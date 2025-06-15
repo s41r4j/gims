@@ -1,0 +1,2 @@
+# gims
+Git Made Simple
