@@ -240,7 +240,7 @@ mno7890 Fix memory leak in image processing pipeline
 
 ## 📄 License
 
-MIT © [Your Name](https://github.com/yourusername)
+MIT © [GIMS](https://github.com/s41r4j/gims)
 
 ---
 
