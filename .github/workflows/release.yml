@@ -25,10 +25,15 @@ jobs:
       - name: Run tests
         run: npm test
 
-      - name: Version patch
-        run: npm version patch
-        
+      - name: Set Git identity
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Bump version
+        run: npm version patch --no-git-tag-version
+
       - name: Publish to npm
-        run: npm publish --access public
+        run: npm publish
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_ACCESS_TOKEN }}
