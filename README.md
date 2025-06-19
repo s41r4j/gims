@@ -5,7 +5,7 @@
   [![npm version](https://img.shields.io/npm/v/gims.svg)](https://npmjs.org/package/gims)
   [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
   [![Node.js Version](https://img.shields.io/node/v/gims.svg)](https://nodejs.org/)
-  [![AI Powered](https://img.shields.io/badge/AI-Powered-blueviolet.svg)](https://github.com/yourusername/gims)
+  [![AI Powered](https://img.shields.io/badge/AI-Powered-blueviolet.svg)](https://github.com/s41r4j/gims)
 
   **The AI-powered Git CLI that writes your commit messages for you**
   
@@ -34,10 +34,10 @@ g o  # AI analyzes changes, commits with perfect message, and pushes!
 ## 🌟 Features
 
 ### 🤖 **AI-Powered Commit Messages**
-- **OpenAI GPT-4** integration for intelligent commit message generation
-- **Google Gemini** support for lightning-fast analysis
+- **OpenAI GPT-4o-mini** integration for intelligent commit message generation
+- **Google Gemini 2.0 Flash** support for lightning-fast analysis
 - Smart diff analysis that understands your code changes
-- Handles large codebases with intelligent summarization
+- Handles large codebases with intelligent summarization and token management
 
 ### ⚡ **Lightning Fast Workflow**
 - **One command commits**: `g o` - analyze, commit, and push in seconds
@@ -95,6 +95,7 @@ g o
 | `gims init` | `g i` | Initialize new Git repo | `g i` |
 | `gims clone <repo>` | `g c` | Clone repository | `g c https://github.com/user/repo` |
 | `gims suggest` | `g s` | Generate & copy commit message | `g s` |
+| `gims commit` | `g cm` | Interactive commit message generation | `g cm` |
 | `gims local` | `g l` | AI commit locally | `g l` |
 | `gims online` | `g o` | AI commit + push | `g o` |
 | `gims pull` | `g p` | Pull latest changes | `g p` |
@@ -144,7 +145,7 @@ g p          # Pull latest changes
 g s          # Preview AI suggestion
 g l          # Commit locally first
 # ... test your changes ...
-g push       # Push when ready
+g o          # Push with AI commit message
 ```
 
 ### 🧠 **Smart Branching**
@@ -180,6 +181,7 @@ GIMS handles edge cases gracefully:
 - **📊 Massive changes**: Falls back to status-based analysis  
 - **🛜 No API key**: Uses sensible default messages
 - **⚠️ API failures**: Graceful degradation with helpful errors
+- **🪙 Token limits**: Intelligent content chunking with 100K token limit
 
 ## 🤝 Contributing
 
@@ -194,8 +196,8 @@ We love contributions! Here's how to get involved:
 
 ### 🐛 Found a Bug?
 
-1. Check [existing issues](https://github.com/yourusername/gims/issues)
-2. Create a [new issue](https://github.com/yourusername/gims/issues/new) with:
+1. Check [existing issues](https://github.com/s41r4j/gims/issues)
+2. Create a [new issue](https://github.com/s41r4j/gims/issues/new) with:
    - Clear description
    - Steps to reproduce
    - Expected vs actual behavior
@@ -248,7 +250,7 @@ MIT © [GIMS](https://github.com/s41r4j/gims)
 
 **⭐ Star this repo if GIMS makes your Git workflow awesome!**
 
-[Report Bug](https://github.com/yourusername/gims/issues) • [Request Feature](https://github.com/yourusername/gims/issues) • [Documentation](https://github.com/yourusername/gims/wiki)
+[Report Bug](https://github.com/s41r4j/gims/issues) • [Request Feature](https://github.com/s41r4j/gims/issues) • [Documentation](https://github.com/s41r4j/gims#readme)
 
 *Made with ❤️ by developers who hate writing commit messages*
 

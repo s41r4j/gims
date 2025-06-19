@@ -5,7 +5,6 @@
 */
 const { Command } = require('commander');
 const simpleGit = require('simple-git');
-const clipboard = require('clipboardy');
 const process = require('process');
 const { OpenAI } = require('openai');
 const { GoogleGenAI } = require('@google/genai');
@@ -116,6 +115,11 @@ async function generateCommitMessage(rawDiff) {
     return 'Update multiple files';
   }
 
+  // Check if API key is available
+  if (!process.env.GEMINI_API_KEY && !process.env.OPENAI_API_KEY) {
+    return null; // Signal that no API key is available
+  }
+
   let message = 'Update project code'; // Default fallback
 
   try {
@@ -125,13 +129,13 @@ async function generateCommitMessage(rawDiff) {
         model: 'gemini-2.0-flash', 
         contents: prompt 
       });
-      message = (await res.response.text()).trim();
+      message = res.text.trim();
     } else if (process.env.OPENAI_API_KEY) {
       const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
       const res = await openai.chat.completions.create({
         model: 'gpt-4o-mini',
         messages: [{ role: 'user', content: prompt }],
-        temperature: 0.5,
+        temperature: 0.75,
         max_tokens: 100 // Limit response length
       });
       message = res.choices[0].message.content.trim();
@@ -176,7 +180,7 @@ program.command('clone <repo>').alias('c')
   });
 
 program.command('suggest').alias('s')
-  .description('Suggest commit message and copy to clipboard')
+  .description('Suggest commit message')
   .action(async () => {
     if (!(await hasChanges())) {
       return console.log('No changes to suggest.');
@@ -185,23 +189,92 @@ program.command('suggest').alias('s')
     const { all } = await safeLog();
     const isFirst = all.length === 0;
     
-    // Always add changes first
-    await git.add('.');
+    // Get diff of unstaged changes
+    let rawDiff = await git.diff();
     
-    // Get the appropriate diff
-    const rawDiff = await git.diff(['--cached']);
-    
+    // If no diff from tracked files, check for untracked files
     if (!rawDiff.trim()) {
-      return console.log('No changes to suggest.');
+      const status = await git.status();
+      if (status.not_added.length > 0) {
+        // For untracked files, show file list since we can't diff them
+        rawDiff = `New files:\n${status.not_added.join('\n')}`;
+      } else {
+        return console.log('No changes to suggest.');
+      }
     }
     
     const msg = await generateCommitMessage(rawDiff);
     
-    try {
-      clipboard.writeSync(msg);
-      console.log(`Suggested: "${msg}" (copied to clipboard)`);
-    } catch (error) {
-      console.log(`Suggested: "${msg}" (clipboard copy failed)`);
+    if (msg === null) {
+      return console.log('Please set GEMINI_API_KEY or OPENAI_API_KEY environment variable');
+    }
+    
+    console.log(`git add . && git commit -m "${msg}"`);
+  });
+
+program.command('commit').alias('cm')
+  .description('Interactive commit message generation')
+  .action(async () => {
+    if (!(await hasChanges())) {
+      return console.log('No changes to commit.');
+    }
+
+    // Get diff for message generation
+    let rawDiff = await git.diff();
+    
+    // If no diff from tracked files, check for untracked files
+    if (!rawDiff.trim()) {
+      const status = await git.status();
+      if (status.not_added.length > 0) {
+        rawDiff = `New files:\n${status.not_added.join('\n')}`;
+      } else {
+        return console.log('No changes to commit.');
+      }
+    }
+
+    if (!process.env.GEMINI_API_KEY && !process.env.OPENAI_API_KEY) {
+      return console.log('Please set GEMINI_API_KEY or OPENAI_API_KEY environment variable');
+    }
+
+    const readline = require('readline');
+    const rl = readline.createInterface({
+      input: process.stdin,
+      output: process.stdout
+    });
+
+    const askForInput = () => {
+      return new Promise((resolve) => {
+        rl.question('> ', (answer) => {
+          resolve(answer.toLowerCase().trim());
+        });
+      });
+    };
+
+    let currentMessage = await generateCommitMessage(rawDiff);
+    console.log(`\n=== Interactive Commit ===`);
+    console.log(`┌──────────────────────────────────────────────────────────────────────┐`);
+    console.log(`│ Press "Enter" to generate new message, "c" to commit, or "q" to quit │`);
+    console.log(`└──────────────────────────────────────────────────────────────────────┘\n`);
+    console.log(`Suggested: "${currentMessage}"`);
+
+    while (true) {
+      const input = await askForInput();
+      
+      if (input === 'q' || input === 'quit') {
+        console.log('Cancelled.');
+        rl.close();
+        return;
+      } else if (input === 'c' || input === 'commit') {
+        await git.add('.');
+        await git.commit(currentMessage);
+        console.log(`Committed: "${currentMessage}"`);
+        rl.close();
+        return;
+      } else {
+        // Generate new message
+        currentMessage = await generateCommitMessage(rawDiff);
+        console.log(`Suggested: "${currentMessage}"`);
+      }
     }
   });
 
@@ -226,6 +299,11 @@ program.command('local').alias('l')
     }
     
     const msg = await generateCommitMessage(rawDiff);
+    
+    if (msg === null) {
+      return console.log('Please set GEMINI_API_KEY or OPENAI_API_KEY environment variable');
+    }
+    
     await git.commit(msg);
     console.log(`Committed locally: "${msg}"`);
   });
@@ -251,6 +329,11 @@ program.command('online').alias('o')
     }
     
     const msg = await generateCommitMessage(rawDiff);
+    
+    if (msg === null) {
+      return console.log('Please set GEMINI_API_KEY or OPENAI_API_KEY environment variable');
+    }
+    
     await git.commit(msg);
     await git.push();
     console.log(`Committed & pushed: "${msg}"`);
