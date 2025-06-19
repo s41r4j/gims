@@ -1,0 +1,45 @@
+{
+  "name": "gims",
+  "version": "0.4.3",
+  "description": "Git Made Simple – AI‑powered git helper using Gemini / OpenAI",
+  "author": "S41R4J",
+  "license": "MIT",
+  "bin": {
+    "gims": "bin/gims.js",
+    "g": "bin/gims.js"
+  },
+  "keywords": [
+    "git",
+    "cli",
+    "ai",
+    "commit",
+    "gpt",
+    "gemini",
+    "openai",
+    "developer-tools",
+    "version-control"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/s41r4j/gims.git"
+  },
+  "bugs": {
+    "url": "https://github.com/s41r4j/gims/issues"
+  },
+  "homepage": "https://github.com/s41r4j/gims#readme",
+  "main": "bin/gims.js",
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "dependencies": {
+    "@google/genai": "^1.5.1",
+    "clipboardy": "^3.0.0",
+    "commander": "^11.1.0",
+    "openai": "^4.0.0",
+    "simple-git": "^3.19.1"
+  },
+  "type": "commonjs",
+  "scripts": {
+    "test": "echo \"No tests yet\" && exit 0"
+  }
+}
