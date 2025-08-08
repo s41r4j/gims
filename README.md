@@ -34,28 +34,29 @@ g o  # AI analyzes changes, commits with perfect message, and pushes!
 ## 🌟 Features
 
 ### 🤖 **AI-Powered Commit Messages**
-- **OpenAI GPT-4** integration for intelligent commit message generation
-- **Google Gemini** support for lightning-fast analysis
+- OpenAI, Google Gemini, and Groq support with automatic provider selection
 - Smart diff analysis that understands your code changes
-- Handles large codebases with intelligent summarization
+- Handles large codebases with intelligent summarization and safe truncation
+- Optional Conventional Commits formatting and optional commit body generation (`--conventional`, `--body`)
 
 ### ⚡ **Lightning Fast Workflow**
-- **One command commits**: `g o` - analyze, commit, and push in seconds
-- **Smart suggestions**: `g s` - get AI-generated messages copied to clipboard
-- **Local commits**: `g l` - commit locally with AI messages
-- **Instant setup**: `g i` - initialize repos in a flash
+- One command commits: `g o` - analyze, commit, and push
+- Smart suggestions: `g s` - get AI-generated messages copied to clipboard
+- Local commits: `g l` - commit locally with AI messages
+- Staged-only by default for suggestions for precise control (use `--all` to stage everything)
 
 ### 🧠 **Intelligent Code Analysis**
 - Analyzes actual code changes, not just file names
 - Understands context from function changes, imports, and logic
-- Handles everything from bug fixes to feature additions
-- Graceful fallbacks for extremely large changesets
+- Graceful fallbacks for extremely large changesets and offline use
 
 ### 🛠️ **Developer-Friendly**
-- **Numbered commit history**: Easy navigation with `g ls`
-- **Smart branching**: `g b 5` creates branch from commit #5
-- **Safe operations**: Built-in error handling and validation
-- **Clean interface**: Intuitive commands that just make sense
+- Numbered commit history with `g ls` / `g ll` and index-aware commands
+- Smart branching: `g b 5` creates branch from commit #5
+- Safe operations with confirmations and dry-run support
+- JSON output for editor integrations
+- Quality-of-life: `--amend`, `undo` command, and automatic upstream setup on push
+- Manual commit command for custom messages: `g m "your message"`
 
 ## 🚀 Quick Start
 
@@ -67,15 +68,24 @@ npm install -g gims
 
 ### Setup AI (Choose One)
 
-**Option 1: OpenAI (Recommended)**
+**Option 1: OpenAI**
 ```bash
 export OPENAI_API_KEY="your-api-key-here"
 ```
 
-**Option 2: Google Gemini (Faster)**
+**Option 2: Google Gemini**
 ```bash
 export GEMINI_API_KEY="your-api-key-here"
 ```
+
+**Option 3: Groq**
+```bash
+export GROQ_API_KEY="your-api-key-here"
+# Optional, if self-hosting/proxying
+export GROQ_BASE_URL="https://api.groq.com/openai/v1"
+```
+
+GIMS auto-detects configured providers. If none are configured, it uses a local heuristic to generate sensible messages.
 
 ### Your First AI Commit
 
@@ -94,15 +104,33 @@ g o
 |---------|-------|-------------|---------|
 | `gims init` | `g i` | Initialize new Git repo | `g i` |
 | `gims clone <repo>` | `g c` | Clone repository | `g c https://github.com/user/repo` |
-| `gims suggest` | `g s` | Generate & copy commit message | `g s` |
+| `gims suggest` | `g s` | Generate & copy commit message from staged changes (use `--all` to stage) | `g s --all` |
 | `gims local` | `g l` | AI commit locally | `g l` |
-| `gims online` | `g o` | AI commit + push | `g o` |
+| `gims online` | `g o` | AI commit + push (use `--set-upstream` on first push) | `g o --set-upstream` |
+| `gims commit <message...>` | `g m` | Commit with a custom message (no AI) | `g m "fix: handle empty input"` |
 | `gims pull` | `g p` | Pull latest changes | `g p` |
 | `gims list` | `g ls` | Show numbered commit history | `g ls` |
 | `gims largelist` | `g ll` | Detailed commit history | `g ll` |
 | `gims branch <n>` | `g b` | Branch from commit #n | `g b 3 feature-x` |
-| `gims reset <n>` | `g r` | Reset to commit #n | `g r 5 --hard` |
-| `gims revert <n>` | `g rv` | Safely revert commit #n | `g rv 2` |
+| `gims reset <n>` | `g r` | Reset to commit #n (`--hard` needs `--yes`) | `g r 5 --hard --yes` |
+| `gims revert <n>` | `g rv` | Safely revert commit #n (requires `--yes`) | `g rv 2 --yes` |
+| `gims undo` | `g u` | Undo last commit (soft reset by default) | `g u` or `g u --hard --yes` |
+
+### Global Options
+
+- `--provider <name>`: AI provider: `auto` | `openai` | `gemini` | `groq` | `none`
+- `--model <name>`: Override model identifier for the chosen provider
+- `--staged-only`: Use only staged changes (default behavior for `g s`)
+- `--all`: Stage all changes before running
+- `--no-clipboard`: Do not copy suggestion to clipboard (for `g s`)
+- `--body`: Generate a commit body in addition to subject
+- `--conventional`: Format subject using Conventional Commits
+- `--dry-run`: Print what would happen without committing/pushing
+- `--verbose`: Verbose logging
+- `--json`: Machine-readable output for `g s`
+- `--yes`: Confirm destructive actions without prompting (e.g., reset/revert/undo)
+- `--amend`: Amend the last commit instead of creating a new one
+- `--set-upstream`: On push, set upstream if the current branch has none
 
 ## 💡 Real-World Examples
 
@@ -136,50 +164,71 @@ g o
 
 ## 🔥 Pro Tips
 
-### 🎯 **Perfect Workflow**
+### 🎯 Perfect Workflow
 ```bash
-# Daily development cycle
-g p          # Pull latest changes
+g p                 # Pull latest changes
 # ... code your features ...
-g s          # Preview AI suggestion
-g l          # Commit locally first
+g s                 # Preview AI suggestion from staged changes
+g s --all           # Or stage everything and suggest
+g l                 # Commit locally first
 # ... test your changes ...
-g push       # Push when ready
+g o --set-upstream  # Push with automatic upstream setup on first push
 ```
 
-### 🧠 **Smart Branching**
+### 🧠 Smart Branching
 ```bash
-g ls         # See numbered history
-g b 5 hotfix # Branch from commit #5
-g l          # Make changes and commit
+g ls                # See numbered history
+g b 5 hotfix        # Branch from commit #5
+g l                 # Make changes and commit
 g checkout main && g pull  # Back to main
 ```
 
-### 🛡️ **Safe Experimentation**
+### 🛡️ Safe Experimentation
 ```bash
-g l          # Commit your experiment
+g l                 # Commit your experiment
 # ... code breaks something ...
-g r 1 --soft # Soft reset to previous commit
-# ... fix and try again ...
+g r 1 --soft --yes  # Soft reset to previous commit (confirmed)
+# ... or ...
+g u --yes           # Undo last commit (soft)
 ```
 
 ## ⚙️ Configuration
 
 ### Environment Variables
 
-| Variable | Purpose | Required |
-|----------|---------|----------|
-| `OPENAI_API_KEY` | OpenAI API access | One of these |
-| `GEMINI_API_KEY` | Google Gemini API access | One of these |
+| Variable | Purpose |
+|----------|---------|
+| `OPENAI_API_KEY` | OpenAI API access |
+| `GEMINI_API_KEY` | Google Gemini API access |
+| `GROQ_API_KEY` | Groq API access (OpenAI-compatible) |
+| `GROQ_BASE_URL` | Groq API base URL (optional) |
+| `GIMS_PROVIDER` | Default provider: `auto` | `openai` | `gemini` | `groq` | `none` |
+| `GIMS_MODEL` | Default model identifier for provider |
+| `GIMS_CONVENTIONAL` | `1` to enable Conventional Commits by default |
+| `GIMS_COPY` | `0` to disable clipboard copying in `g s` by default |
+
+### .gimsrc (optional)
+
+Place a `.gimsrc` JSON file in your repo root or home directory to set defaults:
+
+```json
+{
+  "provider": "auto",
+  "model": "gpt-4o-mini",
+  "conventional": true,
+  "copy": true
+}
+```
 
 ### Smart Fallbacks
 
 GIMS handles edge cases gracefully:
 
-- **🔄 Large diffs**: Automatically switches to file summary mode
-- **📊 Massive changes**: Falls back to status-based analysis  
-- **🛜 No API key**: Uses sensible default messages
-- **⚠️ API failures**: Graceful degradation with helpful errors
+- 🔄 Large diffs: Automatically switches to summary or status view
+- ✂️ Massive text: Truncates safely with informative context
+- 🛜 No API key: Uses a local heuristic that summarizes your changes
+- ⚠️ API failures: Clear errors and local fallback so you keep moving
+- 🔒 Privacy-first: Only sends diffs when you explicitly run AI features
 
 ## 🤝 Contributing
 
@@ -225,10 +274,10 @@ mno7890 Fix memory leak in image processing pipeline
 
 ## 📈 Stats
 
-- ⚡ **10x faster** commits than traditional Git workflow
-- 🎯 **95%+ accuracy** in commit message relevance
-- 📚 **Zero learning curve** - if you know Git, you know GIMS
-- 🌍 **Works everywhere** - Mac, Windows, Linux, WSL
+- ⚡ Faster commits than traditional Git workflow
+- 🎯 High accuracy in commit message relevance
+- 📚 Zero learning curve - if you know Git, you know GIMS
+- 🌍 Works everywhere - Mac, Windows, Linux, WSL
 
 ## 🗺️ Roadmap
 
