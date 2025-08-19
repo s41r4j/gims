@@ -337,7 +337,7 @@ async function hasChanges() {
 program
   .name('gims')
   .alias('g')
-  .version('0.5.0')
+  .version(require('../package.json').version)
   .option('--provider <name>', 'AI provider: auto|openai|gemini|groq|none')
   .option('--model <name>', 'Model identifier for provider')
   .option('--staged-only', 'Use only staged changes (default for suggest)')
