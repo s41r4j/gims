@@ -109,6 +109,7 @@ g o
 | `gims online` | `g o` | AI commit + push (use `--set-upstream` on first push) | `g o --set-upstream` |
 | `gims commit <message...>` | `g m` | Commit with a custom message (no AI) | `g m "fix: handle empty input"` |
 | `gims pull` | `g p` | Pull latest changes | `g p` |
+| `gims amend` | `g a` | Stage all changes and amend the last commit (reuse message) | `g a` |
 | `gims list` | `g ls` | Show numbered commit history | `g ls` |
 | `gims largelist` | `g ll` | Detailed commit history | `g ll` |
 | `gims branch <n>` | `g b` | Branch from commit #n | `g b 3 feature-x` |

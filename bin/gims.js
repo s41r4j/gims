@@ -542,6 +542,32 @@ program.command('pull').alias('p')
     catch (e) { handleError('Pull error', e); }
   });
 
+program.command('amend').alias('a')
+  .description('Stage all changes and amend last commit (no message edit)')
+  .action(async () => {
+    await ensureRepo();
+    try {
+      const { all } = await safeLog();
+      if (!all || all.length === 0) {
+        console.log('No commits to amend. Make an initial commit first.');
+        return;
+      }
+
+      await git.add('.');
+
+      const rawDiff = await git.diff(['--cached', '--no-ext-diff']);
+      if (!rawDiff.trim()) {
+        console.log('No staged changes to amend.');
+        return;
+      }
+
+      await git.raw(['commit', '--amend', '--no-edit']);
+      console.log('Amended last commit with staged changes.');
+    } catch (e) {
+      handleError('Amend error', e);
+    }
+  });
+
 program.command('list').alias('ls')
   .description('Short numbered git log (oldest → newest)')
   .action(async () => {
