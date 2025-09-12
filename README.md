@@ -60,9 +60,32 @@ g o  # AI analyzes changes, commits with perfect message, and pushes!
 
 ## 🚀 Quick Start
 
+### Prerequisites
+
+- Node.js >= 18.18.0 (Node 20+ recommended)
+- npm >= 9
+
+Tip: Use nvm to manage Node versions per-user without sudo:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
+export NVM_DIR="$HOME/.nvm" && . "$NVM_DIR/nvm.sh"
+nvm install 20 && nvm alias default 20
+```
+
 ### Installation
 
 ```bash
+npm install -g gims
+```
+
+If you get EACCES permission errors on Linux when installing globally, set a user prefix:
+
+```bash
+mkdir -p ~/.npm-global
+npm config set prefix '~/.npm-global'
+echo 'export PATH="$HOME/.npm-global/bin:$PATH"' >> ~/.bashrc
+source ~/.bashrc
 npm install -g gims
 ```
 

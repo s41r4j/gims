@@ -29,10 +29,10 @@
   "homepage": "https://github.com/s41r4j/gims#readme",
   "main": "bin/gims.js",
   "engines": {
-    "node": ">=20.0.0"
+    "node": ">=18.18.0"
   },
   "dependencies": {
-    "@google/genai": "^1.5.1",
+    "@google/genai": "1.5.1",
     "clipboardy": "^3.0.0",
     "commander": "^11.1.0",
     "openai": "^4.0.0",
