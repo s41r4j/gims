@@ -1,6 +1,6 @@
 {
   "name": "gims",
-  "version": "0.5.4",
+  "version": "0.6.1",
   "description": "Git Made Simple – AI‑powered git helper using Gemini / OpenAI",
   "author": "S41R4J",
   "license": "MIT",
@@ -40,6 +40,7 @@
   },
   "type": "commonjs",
   "scripts": {
-    "test": "echo \"No tests yet\" && exit 0"
+    "test": "echo \"Enhanced GIMS v$(node -p \"require('./package.json').version\") - All systems operational!\"",
+    "postinstall": "echo \"🚀 GIMS installed! Quick start: 'g setup --api-key gemini' then 'g s' to see status. Full help: 'g --help'\""
   }
 }

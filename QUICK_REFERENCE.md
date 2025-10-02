@@ -1,0 +1,74 @@
+# 🚀 GIMS Quick Reference
+
+## Single-Letter Workflow Commands
+
+```bash
+g s    # Status - Enhanced git status with AI insights
+g i    # Interactive - Guided commit wizard  
+g p    # Preview - See what will be committed
+g l    # Local - AI commit locally
+g o    # Online - AI commit + push
+g h    # History - Numbered commit log
+g a    # Amend - Smart amend with AI
+g u    # Undo - Undo last commit
+```
+
+## Quick Setup
+
+```bash
+# Choose your AI provider (one-time setup)
+g setup --api-key gemini    # 🚀 Recommended: Fast & free
+g setup --api-key openai    # 💎 High quality
+g setup --api-key groq      # ⚡ Ultra fast
+
+# Or run full setup wizard
+g setup
+```
+
+## Essential Workflow
+
+```bash
+# 1. Check what's changed
+g s
+
+# 2. Commit with AI (choose one)
+g i          # Interactive mode (guided)
+g o          # One-command: commit + push
+g l          # Local commit only
+
+# 3. View history
+g h          # Recent commits
+g h --detailed --limit 10  # Detailed view
+```
+
+## Default AI Models
+
+- **Gemini**: `gemini-2.0-flash-exp` (Fast, free, recommended)
+- **OpenAI**: `gpt-4o-mini` (Cost-effective, high quality)
+- **Groq**: `llama-3.1-8b-instant` (Ultra-fast inference)
+
+## Pro Tips
+
+```bash
+g sg --multiple    # Get 3 AI suggestions
+g p               # Preview before committing
+g a               # Smart amend with new AI message
+g sync --rebase   # Smart sync with rebase
+g stash           # Stash with AI description
+```
+
+## Configuration
+
+```bash
+g config --list                    # View all settings
+g config --set conventional=true   # Enable conventional commits
+g config --set autoStage=true      # Auto-stage changes
+g config --set provider=gemini     # Set AI provider
+```
+
+## Help
+
+```bash
+g --help          # All commands
+g <command> --help # Command-specific help
+```

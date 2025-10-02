@@ -1,0 +1,10 @@
+{
+  "provider": "gemini",
+  "model": "",
+  "conventional": true,
+  "copy": true,
+  "autoStage": false,
+  "maxDiffSize": 100000,
+  "cacheEnabled": true,
+  "progressIndicators": true
+}
