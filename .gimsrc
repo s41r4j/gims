@@ -1,5 +1,5 @@
 {
-  "provider": "gemini",
+  "provider": "openai",
   "model": "",
   "conventional": true,
   "copy": true,
