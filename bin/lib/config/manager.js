@@ -164,14 +164,14 @@ class ConfigManager {
       console.log(`  ${color.cyan('g setup --api-key openai')}   # High quality`);
       console.log(`  ${color.cyan('g setup --api-key groq')}     # Ultra fast`);
       console.log('\nOr set environment variables manually:');
-      console.log('  - OPENAI_API_KEY (gpt-4o-mini)');
-      console.log('  - GEMINI_API_KEY (gemini-2.0-flash-exp)');
-      console.log('  - GROQ_API_KEY (llama-3.1-8b-instant)');
+      console.log('  - OPENAI_API_KEY (gpt-5)');
+      console.log('  - GEMINI_API_KEY (gemini-2.5-flash)');
+      console.log('  - GROQ_API_KEY (groq/compound)');
     } else {
       console.log('Available providers with default models:');
-      if (hasGemini) console.log(`  ${color.green('✓')} Google Gemini (gemini-2.0-flash-exp)`);
-      if (hasOpenAI) console.log(`  ${color.green('✓')} OpenAI (gpt-4o-mini)`);
-      if (hasGroq) console.log(`  ${color.green('✓')} Groq (llama-3.1-8b-instant)`);
+      if (hasGemini) console.log(`  ${color.green('✓')} Google Gemini (gemini-2.5-flash)`);
+      if (hasOpenAI) console.log(`  ${color.green('✓')} OpenAI (gpt-5)`);
+      if (hasGroq) console.log(`  ${color.green('✓')} Groq (groq/compound)`);
     }
 
     const provider = await question(`\nPreferred provider (auto/openai/gemini/groq/none) [auto]: `) || 'auto';

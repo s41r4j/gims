@@ -43,9 +43,9 @@ g h --detailed --limit 10  # Detailed view
 
 ## Default AI Models
 
-- **Gemini**: `gemini-2.0-flash-exp` (Fast, free, recommended)
-- **OpenAI**: `gpt-4o-mini` (Cost-effective, high quality)
-- **Groq**: `llama-3.1-8b-instant` (Ultra-fast inference)
+- **Gemini**: `gemini-2.5-flash` (Fast, free, recommended)
+- **OpenAI**: `gpt-5` (Latest GPT model)
+- **Groq**: `groq/compound` (Ultra-fast inference)
 
 ## Pro Tips
 
@@ -70,5 +70,5 @@ g config --set provider=gemini     # Set AI provider
 
 ```bash
 g --help          # All commands
-g <command> --help # Command-specific help
+g q               # This quick reference
 ```

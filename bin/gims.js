@@ -313,9 +313,9 @@ program.command('help-quick').alias('q')
     console.log(`  ${color.cyan('g u')}    Undo - Undo last commit\n`);
     
     console.log(color.bold('Quick Setup:'));
-    console.log(`  ${color.cyan('g setup --api-key gemini')}    🚀 Fast & free (recommended)`);
-    console.log(`  ${color.cyan('g setup --api-key openai')}    💎 High quality`);
-    console.log(`  ${color.cyan('g setup --api-key groq')}      ⚡ Ultra fast\n`);
+    console.log(`  ${color.cyan('g setup --api-key gemini')}    🚀 gemini-2.5-flash (recommended)`);
+    console.log(`  ${color.cyan('g setup --api-key openai')}    💎 gpt-5 (high quality)`);
+    console.log(`  ${color.cyan('g setup --api-key groq')}      ⚡ groq/compound (ultra fast)\n`);
     
     console.log(color.bold('Essential Workflow:'));
     console.log(`  ${color.cyan('g s')}              Check what's changed`);

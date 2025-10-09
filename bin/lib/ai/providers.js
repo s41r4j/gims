@@ -28,9 +28,9 @@ class AIProviderManager {
 
   getDefaultModel(provider) {
     const defaults = {
-      'gemini': 'gemini-2.0-flash-exp',  // Latest and fastest
-      'openai': 'gpt-4o-mini',           // Cost-effective and fast
-      'groq': 'llama-3.1-8b-instant'    // Fast inference
+      'gemini': 'gemini-2.5-flash',     // Latest and fastest
+      'openai': 'gpt-5',                // Latest GPT model
+      'groq': 'groq/compound'           // Latest Groq model
     };
     return defaults[provider] || '';
   }
