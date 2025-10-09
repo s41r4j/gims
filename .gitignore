@@ -1,9 +1,9 @@
 # Dependencies
 node_modules/
 
-# Lock files
-package-lock.json
+# Lock files (keep package-lock.json for consistency)
 bun.lock
+yarn.lock
 
 # Environment variables
 .env
@@ -27,6 +27,14 @@ pids
 # Coverage directory used by tools like istanbul
 coverage/
 
+# Development and build tools
+.kiro/
+.github/
+.npm-cache/
+.cache/
+dist/
+build/
+
 # OS generated files
 .DS_Store
 .DS_Store?
@@ -46,3 +54,6 @@ Thumbs.db
 # Temporary files
 *.tmp
 *.temp
+
+# Local configuration files
+.gimsrc
