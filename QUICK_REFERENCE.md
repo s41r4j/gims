@@ -8,7 +8,9 @@ g i    # Interactive - Guided commit wizard
 g p    # Preview - See what will be committed
 g l    # Local - AI commit locally
 g o    # Online - AI commit + push
-g h    # History - Numbered commit log
+g ls   # List - Short commit history
+g ll   # Large List - Detailed commit history  
+g h    # History - Alias for list
 g a    # Amend - Smart amend with AI
 g u    # Undo - Undo last commit
 ```
@@ -37,8 +39,9 @@ g o          # One-command: commit + push
 g l          # Local commit only
 
 # 3. View history
-g h          # Recent commits
-g h --detailed --limit 10  # Detailed view
+g ls         # Recent commits (short)
+g ll         # Recent commits (detailed)
+g h          # Same as g ls
 ```
 
 ## Default AI Models

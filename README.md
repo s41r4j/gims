@@ -32,7 +32,9 @@ g o    # AI commit + push
 | `g i` | Interactive commit wizard |
 | `g o` | AI commit + push |
 | `g l` | AI commit locally |
-| `g h` | Commit history |
+| `g ls` | Commit history (short) |
+| `g ll` | Commit history (detailed) |
+| `g h` | Commit history (alias for ls) |
 | `g a` | Smart amend |
 
 ## 🤖 AI Models
@@ -51,7 +53,7 @@ g o              # Quick commit + push
 
 # Advanced
 g sg --multiple  # Get 3 AI suggestions
-g h --detailed   # Detailed history
+g ll             # Detailed history
 g sync --rebase  # Smart sync
 ```
 

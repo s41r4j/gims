@@ -308,7 +308,9 @@ program.command('help-quick').alias('q')
     console.log(`  ${color.cyan('g p')}    Preview - See what will be committed`);
     console.log(`  ${color.cyan('g l')}    Local - AI commit locally`);
     console.log(`  ${color.cyan('g o')}    Online - AI commit + push`);
-    console.log(`  ${color.cyan('g h')}    History - Numbered commit log`);
+    console.log(`  ${color.cyan('g ls')}   List - Short commit history`);
+    console.log(`  ${color.cyan('g ll')}   Large List - Detailed commit history`);
+    console.log(`  ${color.cyan('g h')}    History - Alias for list`);
     console.log(`  ${color.cyan('g a')}    Amend - Smart amend with AI`);
     console.log(`  ${color.cyan('g u')}    Undo - Undo last commit\n`);
     
@@ -320,7 +322,7 @@ program.command('help-quick').alias('q')
     console.log(color.bold('Essential Workflow:'));
     console.log(`  ${color.cyan('g s')}              Check what's changed`);
     console.log(`  ${color.cyan('g i')} or ${color.cyan('g o')}        Commit with AI`);
-    console.log(`  ${color.cyan('g h')}              View history\n`);
+    console.log(`  ${color.cyan('g ls')} or ${color.cyan('g h')}      View history\n`);
     
     console.log(`For full help: ${color.cyan('g --help')}`);
     console.log(`For detailed docs: See README.md`);
@@ -736,9 +738,8 @@ program.command('amend').alias('a')
     }
   });
 
-program.command('list').alias('h')
-  .description('Numbered git log (oldest → newest)')
-  .option('--detailed', 'Show detailed information')
+program.command('list').alias('ls')
+  .description('Short numbered git log (oldest → newest)')
   .option('--limit <n>', 'Limit number of commits', '20')
   .action(async (cmdOptions) => {
     await ensureRepo();
@@ -753,12 +754,7 @@ program.command('list').alias('h')
       }
       
       commits.forEach((c, i) => {
-        if (cmdOptions.detailed) {
-          const date = new Date(c.date).toLocaleString();
-          console.log(`${color.cyan((i+1).toString())}. ${color.yellow(c.hash.slice(0,7))} | ${color.dim(date)} | ${color.green(c.author_name)} → ${c.message}`);
-        } else {
-          console.log(`${color.cyan((i+1).toString())}. ${color.yellow(c.hash.slice(0,7))} ${c.message}`);
-        }
+        console.log(`${color.cyan((i+1).toString())}. ${color.yellow(c.hash.slice(0,7))} ${c.message}`);
       });
       
       if (log.all.length >= limit) {
@@ -766,6 +762,61 @@ program.command('list').alias('h')
       }
     } catch (e) { 
       handleError('List error', e); 
+    }
+  });
+
+program.command('largelist').alias('ll')
+  .description('Detailed numbered git log (oldest → newest)')
+  .option('--limit <n>', 'Limit number of commits', '20')
+  .action(async (cmdOptions) => {
+    await ensureRepo();
+    try {
+      const limit = parseInt(cmdOptions.limit) || 20;
+      const log = await git.log({ maxCount: limit });
+      const commits = [...log.all].reverse();
+      
+      if (commits.length === 0) {
+        Progress.info('No commits found');
+        return;
+      }
+      
+      commits.forEach((c, i) => {
+        const date = new Date(c.date).toLocaleString();
+        console.log(`${color.cyan((i+1).toString())}. ${color.yellow(c.hash.slice(0,7))} | ${color.dim(date)} | ${color.green(c.author_name)} → ${c.message}`);
+      });
+      
+      if (log.all.length >= limit) {
+        console.log(color.dim(`\n... showing last ${limit} commits (use --limit to see more)`));
+      }
+    } catch (e) { 
+      handleError('Largelist error', e); 
+    }
+  });
+
+program.command('history').alias('h')
+  .description('Numbered git log (alias for list)')
+  .option('--limit <n>', 'Limit number of commits', '20')
+  .action(async (cmdOptions) => {
+    await ensureRepo();
+    try {
+      const limit = parseInt(cmdOptions.limit) || 20;
+      const log = await git.log({ maxCount: limit });
+      const commits = [...log.all].reverse();
+      
+      if (commits.length === 0) {
+        Progress.info('No commits found');
+        return;
+      }
+      
+      commits.forEach((c, i) => {
+        console.log(`${color.cyan((i+1).toString())}. ${color.yellow(c.hash.slice(0,7))} ${c.message}`);
+      });
+      
+      if (log.all.length >= limit) {
+        console.log(color.dim(`\n... showing last ${limit} commits (use --limit to see more)`));
+      }
+    } catch (e) { 
+      handleError('History error', e); 
     }
   });
 
