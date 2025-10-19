@@ -29,7 +29,8 @@ g o    # AI commit + push
 | Command | Description |
 |---------|-------------|
 | `g s` | Enhanced status with AI insights |
-| `g i` | Interactive commit wizard |
+| `g i` | Initialize git repository |
+| `g int` | Interactive commit wizard |
 | `g o` | AI commit + push |
 | `g l` | AI commit locally |
 | `g ls` | Commit history (short) |
@@ -48,7 +49,7 @@ g o    # AI commit + push
 ```bash
 # Daily workflow
 g s              # Check what changed
-g i              # Interactive commit
+g int            # Interactive commit
 g o              # Quick commit + push
 
 # Advanced

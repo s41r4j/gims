@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.6.4] - 2025-10-19
+
+### 🔧 Command Aliases Fixed
+- **Fixed `g i` alias**: Now correctly initializes a git repository (was incorrectly mapped to interactive mode)
+- **Updated `g interactive` alias**: Changed from `g i` to `g int` to avoid conflicts
+- **Verified `g ls` and `g ll`**: Both commands working correctly (short and detailed commit history)
+
+### 📚 Documentation Updates
+- Updated `QUICK_REFERENCE.md` to reflect correct command aliases
+- Updated help output (`g q`) to show correct mappings
+
+---
+
 ## [0.6.2] - 2024-12-19
 
 ### 🚀 AI Model Updates

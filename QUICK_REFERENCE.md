@@ -4,7 +4,7 @@
 
 ```bash
 g s    # Status - Enhanced git status with AI insights
-g i    # Interactive - Guided commit wizard  
+g i    # Init - Initialize a new Git repository
 g p    # Preview - See what will be committed
 g l    # Local - AI commit locally
 g o    # Online - AI commit + push
@@ -34,7 +34,7 @@ g setup
 g s
 
 # 2. Commit with AI (choose one)
-g i          # Interactive mode (guided)
+g int        # Interactive mode (guided)
 g o          # One-command: commit + push
 g l          # Local commit only
 

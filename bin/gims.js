@@ -237,7 +237,7 @@ program.command('status').alias('s')
     }
   });
 
-program.command('interactive').alias('i')
+program.command('interactive').alias('int')
   .description('Interactive commit wizard')
   .action(async () => {
     await ensureRepo();
@@ -304,7 +304,7 @@ program.command('help-quick').alias('q')
     
     console.log(color.bold('Single-Letter Workflow:'));
     console.log(`  ${color.cyan('g s')}    Status - Enhanced git status with AI insights`);
-    console.log(`  ${color.cyan('g i')}    Interactive - Guided commit wizard`);
+    console.log(`  ${color.cyan('g i')}    Init - Initialize a new Git repository`);
     console.log(`  ${color.cyan('g p')}    Preview - See what will be committed`);
     console.log(`  ${color.cyan('g l')}    Local - AI commit locally`);
     console.log(`  ${color.cyan('g o')}    Online - AI commit + push`);
@@ -321,14 +321,14 @@ program.command('help-quick').alias('q')
     
     console.log(color.bold('Essential Workflow:'));
     console.log(`  ${color.cyan('g s')}              Check what's changed`);
-    console.log(`  ${color.cyan('g i')} or ${color.cyan('g o')}        Commit with AI`);
+    console.log(`  ${color.cyan('g int')} or ${color.cyan('g o')}      Commit with AI (interactive or online)`);
     console.log(`  ${color.cyan('g ls')} or ${color.cyan('g h')}      View history\n`);
     
     console.log(`For full help: ${color.cyan('g --help')}`);
     console.log(`For detailed docs: See README.md`);
   });
 
-program.command('init')
+program.command('init').alias('i')
   .description('Initialize a new Git repository')
   .action(async () => { 
     try { 
