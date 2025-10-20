@@ -36,7 +36,7 @@ g o    # AI commit + push
 | `g ls` | Commit history (short) |
 | `g ll` | Commit history (detailed) |
 | `g h` | Commit history (alias for ls) |
-| `g a` | Smart amend |
+| `g a` | Amend previous commit (keeps message) |
 
 ## 🤖 AI Models
 

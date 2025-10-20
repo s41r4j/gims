@@ -11,7 +11,7 @@ g o    # Online - AI commit + push
 g ls   # List - Short commit history
 g ll   # Large List - Detailed commit history  
 g h    # History - Alias for list
-g a    # Amend - Smart amend with AI
+g a    # Amend - Merge changes into previous commit (keeps message)
 g u    # Undo - Undo last commit
 ```
 
@@ -55,7 +55,8 @@ g h          # Same as g ls
 ```bash
 g sg --multiple    # Get 3 AI suggestions
 g p               # Preview before committing
-g a               # Smart amend with new AI message
+g a               # Amend: merge changes to previous commit (keeps message)
+g a --edit        # Amend with new AI-generated message
 g sync --rebase   # Smart sync with rebase
 g stash           # Stash with AI description
 ```

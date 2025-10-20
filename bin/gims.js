@@ -311,7 +311,7 @@ program.command('help-quick').alias('q')
     console.log(`  ${color.cyan('g ls')}   List - Short commit history`);
     console.log(`  ${color.cyan('g ll')}   Large List - Detailed commit history`);
     console.log(`  ${color.cyan('g h')}    History - Alias for list`);
-    console.log(`  ${color.cyan('g a')}    Amend - Smart amend with AI`);
+    console.log(`  ${color.cyan('g a')}    Amend - Merge changes to previous commit (keeps message)`);
     console.log(`  ${color.cyan('g u')}    Undo - Undo last commit\n`);
     
     console.log(color.bold('Quick Setup:'));
@@ -701,8 +701,8 @@ program.command('stash')
   });
 
 program.command('amend').alias('a')
-  .description('Stage all changes and amend last commit')
-  .option('--no-edit', 'Keep existing commit message')
+  .description('Stage all changes and amend last commit (keeps message)')
+  .option('--edit', 'Generate new AI commit message')
   .action(async (cmdOptions) => {
     await ensureRepo();
     try {
@@ -721,10 +721,7 @@ program.command('amend').alias('a')
         return;
       }
 
-      if (cmdOptions.noEdit) {
-        await git.raw(['commit', '--amend', '--no-edit']);
-        Progress.success('Amended last commit with staged changes');
-      } else {
+      if (cmdOptions.edit) {
         // Generate new message for amend
         Progress.start('🤖 Generating updated commit message');
         const newMessage = await generateCommitMessage(rawDiff, getOpts());
@@ -732,6 +729,10 @@ program.command('amend').alias('a')
         
         await git.raw(['commit', '--amend', '-m', newMessage]);
         Progress.success(`Amended commit: "${newMessage}"`);
+      } else {
+        // Default: Keep existing message (--no-edit)
+        await git.raw(['commit', '--amend', '--no-edit']);
+        Progress.success('Amended last commit with staged changes (kept original message)');
       }
     } catch (e) {
       handleError('Amend error', e);

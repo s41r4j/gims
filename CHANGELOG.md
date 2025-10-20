@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.6.5] - 2025-10-20
+
+### 🔧 Command Behavior Updated
+- **`g a` (amend) default behavior changed**: Now keeps the original commit message by default (`--no-edit`)
+- **New `--edit` flag**: Use `g a --edit` to generate a new AI commit message
+- **Simpler workflow**: `g a` simply merges current changes into previous commit without editing the message
+
+### 📚 Documentation Updates
+- Updated all documentation to reflect the new amend behavior
+- Clarified that `g a` merges changes while keeping the original message
+
+---
+
 ## [0.6.4] - 2025-10-19
 
 ### 🔧 Command Aliases Fixed
