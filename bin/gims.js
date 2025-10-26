@@ -137,7 +137,7 @@ async function hasChanges() {
 program
   .name('gims')
   .alias('g')
-  .version(require('../package.json').version)
+  .version(require('../package.json').version, '-v, --version', 'Output the version number')
   .option('--provider <name>', 'AI provider: auto|openai|gemini|groq|none')
   .option('--model <name>', 'Model identifier for provider')
   .option('--staged-only', 'Use only staged changes (default for suggest)')
@@ -321,7 +321,7 @@ program.command('config')
     }
   });
 
-program.command('help-quick').alias('q')
+program.command('quick-help').alias('q')
   .description('Show quick reference for main commands')
   .action(() => {
     console.log(color.bold('🚀 GIMS Quick Reference\n'));
@@ -646,6 +646,18 @@ program.command('pull')
       Progress.success('Pulled latest changes');
     }
     catch (e) { handleError('Pull error', e); }
+  });
+
+program.command('push')
+  .description('Push commits to remote')
+  .action(async () => {
+    await ensureRepo();
+    try {
+      Progress.info('Pushing to remote...');
+      await git.push();
+      Progress.success('Pushed to remote');
+    }
+    catch (e) { handleError('Push error', e); }
   });
 
 program.command('sync')

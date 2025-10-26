@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.6.7] - 2025-10-26
+
+### 🔧 Fixes
+- **Added `-v` flag for version**: Now `g -v` or `gims -v` shows the version number
+- **Renamed command**: Changed `help-quick` to `quick-help` (alias `q` still works)
+- **Added `push` command**: Now `g push` or `gims push` works as a standalone command
+
+---
+
 ## [0.6.6] - 2025-10-26
 
 ### 🔧 Improvements
