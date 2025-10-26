@@ -1,5 +1,21 @@
 # Changelog
 
+## [0.6.6] - 2025-10-26
+
+### 🔧 Improvements
+- **Removed commit message length restriction**: AI can now generate commit messages of any length (no more `...` truncation at 72 chars)
+- **Added confirmation prompt for local heuristics**: When no AI provider is configured, the tool now asks for confirmation `[Y/n]` before committing
+  - Default is `Y` (just press Enter to accept)
+  - Warning message clearly indicates "local heuristics" instead of AI
+  - Can be bypassed with `--yes` flag for automation
+- **Better user awareness**: Users are now informed when local heuristics are used instead of AI
+
+### 📚 User Experience
+- More transparent about when AI is used vs. local pattern matching
+- Safer commits when API keys are not configured
+
+---
+
 ## [0.6.5] - 2025-10-20
 
 ### 🔧 Command Behavior Updated

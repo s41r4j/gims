@@ -90,7 +90,31 @@ async function safeLog() {
 
 
 async function generateCommitMessage(rawDiff, options = {}) {
-  return await aiProvider.generateCommitMessage(rawDiff, options);
+  const result = await aiProvider.generateCommitMessage(rawDiff, options);
+  // Return both message and whether local heuristics were used
+  return result;
+}
+
+async function confirmCommit(message, isLocalHeuristic) {
+  if (!isLocalHeuristic) return true; // No confirmation needed for AI-generated messages
+  
+  const readline = require('readline');
+  const rl = readline.createInterface({
+    input: process.stdin,
+    output: process.stdout
+  });
+
+  console.log(color.yellow('\n⚠️  No AI provider configured - using local heuristics'));
+  console.log(`Suggested commit: "${message}"`);
+  
+  return new Promise((resolve) => {
+    rl.question('Proceed with this commit? [Y/n]: ', (answer) => {
+      rl.close();
+      const trimmed = answer.trim().toLowerCase();
+      // Default to 'yes' if empty (just Enter pressed)
+      resolve(trimmed === '' || trimmed === 'y' || trimmed === 'yes');
+    });
+  });
 }
 
 async function resolveCommit(input) {
@@ -392,11 +416,19 @@ program.command('suggest').alias('sg')
         }
       } else {
         if (opts.progressIndicators) Progress.start('🤖 Analyzing changes');
-        const msg = await generateCommitMessage(rawDiff, opts);
+        const result = await generateCommitMessage(rawDiff, opts);
         if (opts.progressIndicators) Progress.stop('');
+        
+        const msg = result.message || result; // Handle both old and new format
+        const usedLocal = result.usedLocal || false;
+        
+        // Warn if using local heuristics
+        if (usedLocal) {
+          console.log(color.yellow('⚠️  No AI provider configured - using local heuristics'));
+        }
 
         if (opts.json) {
-          const out = { message: msg };
+          const out = { message: msg, usedLocalHeuristics: usedLocal };
           console.log(JSON.stringify(out));
           return;
         }
@@ -446,13 +478,25 @@ program.command('local').alias('l')
       }
 
       if (opts.progressIndicators) Progress.start('🤖 Generating commit message');
-      const msg = await generateCommitMessage(rawDiff, opts);
+      const result = await generateCommitMessage(rawDiff, opts);
       if (opts.progressIndicators) Progress.stop('');
+      
+      const msg = result.message || result; // Handle both old and new format
+      const usedLocal = result.usedLocal || false;
 
       if (opts.dryRun) {
         console.log(color.yellow('[dry-run] Would commit with message:'));
         console.log(msg);
         return;
+      }
+
+      // Ask for confirmation if using local heuristics (unless --yes flag is set)
+      if (usedLocal && !opts.yes) {
+        const confirmed = await confirmCommit(msg, true);
+        if (!confirmed) {
+          Progress.info('Commit cancelled');
+          return;
+        }
       }
 
       if (opts.amend) {
@@ -496,13 +540,25 @@ program.command('online').alias('o')
       }
 
       if (opts.progressIndicators) Progress.start('🤖 Generating commit message');
-      const msg = await generateCommitMessage(rawDiff, opts);
+      const result = await generateCommitMessage(rawDiff, opts);
       if (opts.progressIndicators) Progress.stop('');
+      
+      const msg = result.message || result; // Handle both old and new format
+      const usedLocal = result.usedLocal || false;
 
       if (opts.dryRun) {
         console.log(color.yellow('[dry-run] Would commit & push with message:'));
         console.log(msg);
         return;
+      }
+
+      // Ask for confirmation if using local heuristics (unless --yes flag is set)
+      if (usedLocal && !opts.yes) {
+        const confirmed = await confirmCommit(msg, true);
+        if (!confirmed) {
+          Progress.info('Commit cancelled');
+          return;
+        }
       }
 
       Progress.info('Committing changes...');
@@ -723,9 +779,22 @@ program.command('amend').alias('a')
 
       if (cmdOptions.edit) {
         // Generate new message for amend
+        const opts = getOpts();
         Progress.start('🤖 Generating updated commit message');
-        const newMessage = await generateCommitMessage(rawDiff, getOpts());
+        const result = await generateCommitMessage(rawDiff, opts);
         Progress.stop('');
+        
+        const newMessage = result.message || result; // Handle both old and new format
+        const usedLocal = result.usedLocal || false;
+        
+        // Ask for confirmation if using local heuristics (unless --yes flag is set)
+        if (usedLocal && !opts.yes) {
+          const confirmed = await confirmCommit(newMessage, true);
+          if (!confirmed) {
+            Progress.info('Amend cancelled');
+            return;
+          }
+        }
         
         await git.raw(['commit', '--amend', '-m', newMessage]);
         Progress.success(`Amended commit: "${newMessage}"`);

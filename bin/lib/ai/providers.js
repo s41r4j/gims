@@ -46,7 +46,7 @@ class AIProviderManager {
     return this.cache.get(cacheKey);
   }
 
-  setCache(cacheKey, result) {
+  setCache(cacheKey, result, usedLocal = false) {
     if (!this.config.cacheEnabled) return;
     
     if (this.cache.size >= this.maxCacheSize) {
@@ -56,6 +56,7 @@ class AIProviderManager {
     
     this.cache.set(cacheKey, {
       result,
+      usedLocal,
       timestamp: Date.now()
     });
   }
@@ -129,7 +130,7 @@ class AIProviderManager {
     const cached = this.getFromCache(cacheKey);
     if (cached && Date.now() - cached.timestamp < 3600000) { // 1 hour cache
       if (verbose) Progress.info('Using cached result');
-      return cached.result;
+      return { message: cached.result, usedLocal: cached.usedLocal || false };
     }
 
     const providerChain = this.buildProviderChain(preferredProvider);
@@ -140,16 +141,16 @@ class AIProviderManager {
         
         if (provider === 'local') {
           const result = await this.generateLocalHeuristic(diff, options);
-          this.setCache(cacheKey, result);
-          return result;
+          this.setCache(cacheKey, result, true);
+          return { message: result, usedLocal: true };
         }
 
         const prompt = this.buildPrompt(diff, { conventional, body });
         const result = await this.generateWithProvider(provider, prompt, options);
         const cleaned = this.cleanCommitMessage(result, { body });
         
-        this.setCache(cacheKey, cleaned);
-        return cleaned;
+        this.setCache(cacheKey, cleaned, false);
+        return { message: cleaned, usedLocal: false };
         
       } catch (error) {
         if (verbose) Progress.warning(`${provider} failed: ${error.message}`);
@@ -159,8 +160,8 @@ class AIProviderManager {
 
     // Final fallback
     const fallback = 'Update project files';
-    this.setCache(cacheKey, fallback);
-    return fallback;
+    this.setCache(cacheKey, fallback, true);
+    return { message: fallback, usedLocal: true };
   }
 
   buildProviderChain(preferred) {
@@ -213,7 +214,7 @@ class AIProviderManager {
     let subject = (lines[0] || '').replace(/\s{2,}/g, ' ').replace(/[\s:,.!;]+$/g, '').trim();
     
     if (subject.length === 0) subject = 'Update project code';
-    if (subject.length > 72) subject = subject.substring(0, 69) + '...';
+    // No length restriction - allow AI to generate full commit messages
 
     if (!options.body) return subject;
 
