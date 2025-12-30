@@ -26,17 +26,36 @@ g o    # AI commit + push
 
 ## 🎯 Main Commands
 
+### 🧠 Smart Commands
 | Command | Description |
 |---------|-------------|
 | `g s` | Enhanced status with AI insights |
-| `g i` | Initialize git repository |
-| `g int` | Interactive commit wizard |
 | `g o` | AI commit + push |
 | `g l` | AI commit locally |
+| `g wip` | Quick WIP commit |
+| `g r` | AI code review |
+| `g t` | Show today's commits |
+| `g stats` | Personal commit statistics |
+
+### ⚡ Workflow Shortcuts
+| Command | What it does |
+|---------|--------------|
+| `g sp` | **Safe Pull** (Stash → Pull → Pop) |
+| `g fix` | **Smart Fix** for branch sync issues |
+| `g main` | Switch to main/master + pull |
+| `g ss` | Quick stash save |
+| `g pop` | Pop latest stash |
+| `g us` | Unstage all files |
+| `g x` | Discard all changes (with confirm) |
+
+### 🛠️ Helper Commands
+| Command | Description |
+|---------|-------------|
+| `g last` | Show last commit details |
+| `g conflicts` | Conflict resolution helper |
+| `g clean` | Remove dead local branches |
 | `g ls` | Commit history (short) |
-| `g ll` | Commit history (detailed) |
-| `g h` | Commit history (alias for ls) |
-| `g a` | Amend previous commit (keeps message) |
+| `g a` | Amend previous commit |
 
 ## 🤖 AI Models
 
@@ -48,14 +67,15 @@ g o    # AI commit + push
 
 ```bash
 # Daily workflow
-g s              # Check what changed
-g int            # Interactive commit
-g o              # Quick commit + push
+g s              # Check status
+g sp             # Safe pull updates
+g fix            # Fix any sync issues
+g o              # Commit + push
 
-# Advanced
-g sg --multiple  # Get 3 AI suggestions
-g ll             # Detailed history
-g sync --rebase  # Smart sync
+# Power functions
+g r              # Review code before commit
+g stats          # Check your streak
+g split          # Split big changesets
 ```
 
 ## 🔧 Configuration

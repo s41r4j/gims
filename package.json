@@ -1,7 +1,7 @@
 {
   "name": "gims",
-  "version": "0.6.7",
-  "description": "Git Made Simple – AI‑powered git helper using Gemini / OpenAI",
+  "version": "0.8.1",
+  "description": "Git Made Simple – AI‑powered git helper with smart insights, stats & code review",
   "author": "S41R4J",
   "license": "MIT",
   "bin": {

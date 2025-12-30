@@ -18,7 +18,7 @@ class AIProviderManager {
     if (preference === 'openai') return process.env.OPENAI_API_KEY ? 'openai' : 'none';
     if (preference === 'gemini') return process.env.GEMINI_API_KEY ? 'gemini' : 'none';
     if (preference === 'groq') return process.env.GROQ_API_KEY ? 'groq' : 'none';
-    
+
     // Auto-detection with preference order (Gemini first - fastest and cheapest)
     if (process.env.GEMINI_API_KEY) return 'gemini';
     if (process.env.OPENAI_API_KEY) return 'openai';
@@ -48,12 +48,12 @@ class AIProviderManager {
 
   setCache(cacheKey, result, usedLocal = false) {
     if (!this.config.cacheEnabled) return;
-    
+
     if (this.cache.size >= this.maxCacheSize) {
       const firstKey = this.cache.keys().next().value;
       this.cache.delete(firstKey);
     }
-    
+
     this.cache.set(cacheKey, {
       result,
       usedLocal,
@@ -103,9 +103,9 @@ class AIProviderManager {
   }
 
   async generateWithGroq(prompt, model, options) {
-    const groq = new OpenAI({ 
-      apiKey: process.env.GROQ_API_KEY, 
-      baseURL: process.env.GROQ_BASE_URL || 'https://api.groq.com/openai/v1' 
+    const groq = new OpenAI({
+      apiKey: process.env.GROQ_API_KEY,
+      baseURL: process.env.GROQ_BASE_URL || 'https://api.groq.com/openai/v1'
     });
     const actualModel = model || this.getDefaultModel('groq');
     const response = await groq.chat.completions.create({
@@ -118,11 +118,11 @@ class AIProviderManager {
   }
 
   async generateCommitMessage(diff, options = {}) {
-    const { 
-      provider: preferredProvider = 'auto', 
-      conventional = false, 
+    const {
+      provider: preferredProvider = 'auto',
+      conventional = false,
       body = false,
-      verbose = false 
+      verbose = false
     } = options;
 
     // Check cache first
@@ -134,11 +134,11 @@ class AIProviderManager {
     }
 
     const providerChain = this.buildProviderChain(preferredProvider);
-    
+
     for (const provider of providerChain) {
       try {
         if (verbose) Progress.info(`Trying provider: ${provider}`);
-        
+
         if (provider === 'local') {
           const result = await this.generateLocalHeuristic(diff, options);
           this.setCache(cacheKey, result, true);
@@ -148,10 +148,10 @@ class AIProviderManager {
         const prompt = this.buildPrompt(diff, { conventional, body });
         const result = await this.generateWithProvider(provider, prompt, options);
         const cleaned = this.cleanCommitMessage(result, { body });
-        
+
         this.setCache(cacheKey, cleaned, false);
         return { message: cleaned, usedLocal: false };
-        
+
       } catch (error) {
         if (verbose) Progress.warning(`${provider} failed: ${error.message}`);
         continue;
@@ -166,7 +166,7 @@ class AIProviderManager {
 
   buildProviderChain(preferred) {
     const available = [];
-    
+
     if (preferred !== 'auto' && preferred !== 'none') {
       const resolved = this.resolveProvider(preferred);
       if (resolved !== 'none') available.push(resolved);
@@ -175,28 +175,28 @@ class AIProviderManager {
       if (process.env.OPENAI_API_KEY) available.push('openai');
       if (process.env.GROQ_API_KEY) available.push('groq');
     }
-    
+
     available.push('local');
     return [...new Set(available)];
   }
 
   buildPrompt(diff, options) {
     const { conventional, body } = options;
-    
-    const style = conventional 
+
+    const style = conventional
       ? 'Use Conventional Commits format (e.g., feat:, fix:, chore:) for the subject.'
       : 'Subject must be a single short line.';
-    
-    const bodyInstr = body 
+
+    const bodyInstr = body
       ? 'Provide a short subject line followed by an optional body separated by a blank line.'
       : 'Return only a short subject line without extra quotes.';
-    
+
     return `Write a concise git commit message for these changes:\n${diff}\n\n${style} ${bodyInstr}`;
   }
 
   cleanCommitMessage(message, options = {}) {
     if (!message) return 'Update project code';
-    
+
     // Remove markdown formatting
     let cleaned = message
       .replace(/```[\s\S]*?```/g, '')
@@ -212,7 +212,7 @@ class AIProviderManager {
 
     const lines = cleaned.split('\n').map(l => l.trim()).filter(Boolean);
     let subject = (lines[0] || '').replace(/\s{2,}/g, ' ').replace(/[\s:,.!;]+$/g, '').trim();
-    
+
     if (subject.length === 0) subject = 'Update project code';
     // No length restriction - allow AI to generate full commit messages
 
@@ -226,16 +226,16 @@ class AIProviderManager {
   async generateLocalHeuristic(diff, options) {
     // This would need access to git status - simplified version
     const { conventional = false } = options;
-    
+
     // Analyze diff for patterns
     const lines = diff.split('\n');
     const additions = lines.filter(l => l.startsWith('+')).length;
     const deletions = lines.filter(l => l.startsWith('-')).length;
     const files = (diff.match(/diff --git/g) || []).length;
-    
+
     let type = 'chore';
     let subject = 'update files';
-    
+
     if (additions > deletions * 2) {
       type = 'feat';
       subject = files === 1 ? 'add new functionality' : `add features to ${files} files`;
@@ -249,37 +249,39 @@ class AIProviderManager {
       type = 'docs';
       subject = 'update documentation';
     }
-    
+
     return conventional ? `${type}: ${subject}` : subject.charAt(0).toUpperCase() + subject.slice(1);
   }
 
   async generateMultipleSuggestions(diff, options = {}, count = 3) {
     const suggestions = [];
     const baseOptions = { ...options };
-    
+
     // Generate different styles
     const variants = [
       { ...baseOptions, conventional: false },
       { ...baseOptions, conventional: true },
       { ...baseOptions, conventional: true, body: true }
     ];
-    
+
     for (let i = 0; i < Math.min(count, variants.length); i++) {
       try {
-        const suggestion = await this.generateCommitMessage(diff, variants[i]);
-        if (!suggestions.includes(suggestion)) {
-          suggestions.push(suggestion);
+        const result = await this.generateCommitMessage(diff, variants[i]);
+        // Extract message string from result object
+        const message = result.message || result;
+        if (message && !suggestions.includes(message)) {
+          suggestions.push(message);
         }
       } catch (error) {
         // Skip failed generations
       }
     }
-    
+
     // Ensure we have at least one suggestion
     if (suggestions.length === 0) {
       suggestions.push('Update project files');
     }
-    
+
     return suggestions;
   }
 }

@@ -1,5 +1,85 @@
 # Changelog
 
+## [0.8.1] - 2025-12-19
+
+### 🚀 Smart Sync Fix
+New `g fix` command to handle branch sync issues (diverged/ahead/behind):
+
+| Option | What it does |
+|--------|--------------|
+| `g fix` | Show status and available options |
+| `g fix --ai` | Get AI recommendation for best approach |
+| `g fix --merge` | Merge remote into local |
+| `g fix --rebase` | Rebase local onto remote |
+| `g fix --local --yes` | Force push local to remote |
+| `g fix --remote --yes` | Reset to remote, discard local |
+
+### 🔧 Conflict Helper
+New `g conflicts` command shows conflicted files and how to resolve them.
+
+---
+
+## [0.8.0] - 2025-12-19
+
+### 🚀 New Workflow Shorthand Commands
+Multi-step git workflows simplified to single commands:
+
+| Command | Alias | What it does |
+|---------|-------|--------------|
+| `safe-pull` | `sp` | Stash → Pull → Stash pop (safe pull with uncommitted changes) |
+| `main` | - | Switch to main/master and pull latest |
+| `unstage` | `us` | Unstage all staged files |
+| `discard` | `x` | Discard all changes (with --yes confirmation) |
+| `stash-save` | `ss` | Quick stash all changes with auto-generated name |
+| `stash-pop` | `pop` | Pop the latest stash |
+| `delete-branch` | `del` | Delete branch locally and remotely |
+| `cleanup` | `clean` | Remove local branches deleted from remote |
+| `last` | - | Show last commit details and diff |
+
+---
+
+## [0.7.2] - 2025-12-18
+
+### 🐛 Bug Fix
+- **Fixed progress spinner garbage output**: Spinner now properly clears the line when stopping, preventing partial text artifacts like ` (1ms)rating AI review ⠋`
+
+---
+
+## [0.7.1] - 2025-12-18
+
+### 🐛 Bug Fix
+- **Fixed AI suggestions in interactive mode**: Multiple suggestions now correctly display message strings instead of `[object Object]`
+
+---
+
+## [0.7.0] - 2025-12-18
+
+### 🚀 New Intelligent Commands
+- **`g wip`**: Quick work-in-progress commit - stage all and commit instantly
+- **`g today` / `g t`**: Show all commits made today with timestamps
+- **`g stats`**: Personal commit statistics with streak tracking, type breakdown, and style analysis
+- **`g review` / `g r`**: AI code review before committing - shows complexity, detected patterns, and suggested message
+- **`g split`**: Smart suggestions for splitting large changesets into atomic commits
+
+### ✨ Enhanced Status
+- **File type emojis**: 📄 JS, 🎨 CSS, 🧪 tests, ⚙️ config, 📦 package.json, etc.
+- **Session awareness**: Shows time since last commit and daily commit count
+- **Branch context**: Detects branch type from naming patterns (feat/, fix/, etc.)
+- **Smarter insights**: Suggests staging, split commits, and more
+
+### 🧠 Intelligence Module
+- **Commit pattern analysis**: Learns your style from git history
+- **Semantic change detection**: Identifies breaking changes, new features, bug fixes
+- **Complexity analysis**: Visual indicators for simple/moderate/complex changes
+
+### 📊 UX Improvements
+- **Time elapsed display**: Shows how long operations take
+- **Random tips**: Contextual tips to help learn GIMS features
+- **Cached response indicators**: Know when AI cache is used
+- **Better quick-help**: Reorganized command reference with new commands
+
+---
+
 ## [0.6.7] - 2025-10-26
 
 ### 🔧 Fixes
