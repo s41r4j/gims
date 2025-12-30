@@ -28,9 +28,9 @@ class AIProviderManager {
 
   getDefaultModel(provider) {
     const defaults = {
-      'gemini': 'gemini-2.5-flash',     // Latest and fastest
-      'openai': 'gpt-5',                // Latest GPT model
-      'groq': 'groq/compound'           // Latest Groq model
+      'gemini': 'gemini-3-flash-preview',  // Latest Gemini model
+      'openai': 'gpt-5.2-2025-12-11',      // Latest GPT model
+      'groq': 'groq/compound'              // Latest Groq model
     };
     return defaults[provider] || '';
   }
@@ -67,11 +67,11 @@ class AIProviderManager {
     try {
       switch (provider) {
         case 'gemini':
-          return await this.generateWithGemini(prompt, model || 'gemini-2.0-flash', options);
+          return await this.generateWithGemini(prompt, model || this.getDefaultModel('gemini'), options);
         case 'openai':
-          return await this.generateWithOpenAI(prompt, model || 'gpt-4o-mini', options);
+          return await this.generateWithOpenAI(prompt, model || this.getDefaultModel('openai'), options);
         case 'groq':
-          return await this.generateWithGroq(prompt, model || 'llama-3.1-8b-instant', options);
+          return await this.generateWithGroq(prompt, model || this.getDefaultModel('groq'), options);
         default:
           throw new Error(`Unknown provider: ${provider}`);
       }
