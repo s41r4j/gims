@@ -1687,15 +1687,22 @@ program.command('fix')
           Recommended Command: <command>
         `;
 
-        // Use the preferred provider to generate response
+        // Use preferred provider or auto-resolve
+        const provider = aiProvider.resolveProvider(opts.provider);
+        if (provider === 'none') {
+          Progress.stop('');
+          console.log(color.yellow('No AI provider configured. Falling back to simple heuristics.'));
+          // ... heuristic fallback ...
+          let rec = '';
+          if (ahead > 0 && behind === 0) rec = 'Push (g push)';
+          else if (behind > 0 && ahead === 0) rec = 'Pull (g pull)';
+          else rec = 'Rebase (g fix --rebase)';
+          console.log(`Recommendation: ${rec}`);
+          return;
+        }
+
         try {
-          const response = await aiProvider.generateWithGemini(prompt, null, { temperature: 0.3 }); // Defaulting to using the generate methods available
-          // Note: In a cleaner refactor, we would expose a generic 'generate' on AIProviderManager
-          // For now, we assume Gemini or fallback logic is inside manager, but let's assume we can call generateText or similar
-          // Wait, looking at previous file reads, AIProviderManager has 'generateWithGemini' etc but maybe not a generic 'generate'.
-          // Let's use the 'generateCommitMessage's underlying logic or just call the provider directly if we can't genericize.
-          // Actually, I should check if there is a 'ask' method.
-          // ... (Self-correction: I'll use a safer approach below)
+          const response = await aiProvider.generateWithProvider(provider, prompt, { temperature: 0.3 }); // Use generic provider method
 
           Progress.stop('');
           console.log(`\n${color.bold('🤖 AI Analysis:')}`);
@@ -1712,30 +1719,44 @@ program.command('fix')
         }
         return;
       }
+      console.log(`\n${color.bold('🤖 AI Analysis:')}`);
+      console.log(response.trim());
+    } catch (e) {
+      Progress.stop('');
+      console.log(color.yellow('AI Analysis failed, falling back to heuristics.'));
+      // ... heuristic fallback code ...
+      let rec = '';
+      if (ahead > 0 && behind === 0) rec = 'Push (g push)';
+      else if (behind > 0 && ahead === 0) rec = 'Pull (g pull)';
+      else rec = 'Rebase (g fix --rebase)';
+      console.log(`Recommendation: ${rec}`);
+    }
+    return;
+  }
 
       // Show interactive menu
       console.log(color.bold('🔧 Fix Options:\n'));
 
-      if (situation === 'ahead') {
-        console.log(`  ${color.cyan('g push')}           Push your commits to remote`);
-      } else if (situation === 'behind') {
-        console.log(`  ${color.cyan('g pull')}           Get remote commits (fast-forward)`);
-        console.log(`  ${color.cyan('g sp')}             Safe pull (stash → pull → pop)`);
-      } else {
-        // Diverged
-        console.log(`  ${color.cyan('g fix --merge')}    Merge remote into local (creates merge commit)`);
-        console.log(`  ${color.cyan('g fix --rebase')}   Rebase local onto remote (linear history)`);
-        console.log(color.dim('  ─────────────────'));
-        console.log(`  ${color.cyan('g fix --local')}    ${color.yellow('⚠')} Force push local, overwrite remote`);
-        console.log(`  ${color.cyan('g fix --remote')}   ${color.yellow('⚠')} Reset to remote, discard local commits`);
-      }
+if (situation === 'ahead') {
+  console.log(`  ${color.cyan('g push')}           Push your commits to remote`);
+} else if (situation === 'behind') {
+  console.log(`  ${color.cyan('g pull')}           Get remote commits (fast-forward)`);
+  console.log(`  ${color.cyan('g sp')}             Safe pull (stash → pull → pop)`);
+} else {
+  // Diverged
+  console.log(`  ${color.cyan('g fix --merge')}    Merge remote into local (creates merge commit)`);
+  console.log(`  ${color.cyan('g fix --rebase')}   Rebase local onto remote (linear history)`);
+  console.log(color.dim('  ─────────────────'));
+  console.log(`  ${color.cyan('g fix --local')}    ${color.yellow('⚠')} Force push local, overwrite remote`);
+  console.log(`  ${color.cyan('g fix --remote')}   ${color.yellow('⚠')} Reset to remote, discard local commits`);
+}
 
-      console.log(color.dim('  ─────────────────'));
-      console.log(`  ${color.cyan('g fix --ai')}       Get AI recommendation`);
+console.log(color.dim('  ─────────────────'));
+console.log(`  ${color.cyan('g fix --ai')}       Get AI recommendation`);
 
     } catch (e) {
-      handleError('Fix error', e);
-    }
+  handleError('Fix error', e);
+}
   });
 
 program.command('conflicts')
