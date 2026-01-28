@@ -15,14 +15,17 @@ class AIProviderManager {
 
   resolveProvider(preference = 'auto') {
     if (preference === 'none') return 'none';
-    if (preference === 'openai') return process.env.OPENAI_API_KEY ? 'openai' : 'none';
-    if (preference === 'gemini') return process.env.GEMINI_API_KEY ? 'gemini' : 'none';
-    if (preference === 'groq') return process.env.GROQ_API_KEY ? 'groq' : 'none';
+    
+    // Check if preferred provider's key is available
+    if (preference === 'openai' && process.env.OPENAI_API_KEY) return 'openai';
+    if (preference === 'gemini' && process.env.GEMINI_API_KEY) return 'gemini';
+    if (preference === 'groq' && process.env.GROQ_API_KEY) return 'groq';
 
-    // Auto-detection with preference order (Gemini first - fastest and cheapest)
+    // Fallback: try any available provider (priority: Gemini → OpenAI → Groq)
     if (process.env.GEMINI_API_KEY) return 'gemini';
     if (process.env.OPENAI_API_KEY) return 'openai';
     if (process.env.GROQ_API_KEY) return 'groq';
+    
     return 'none';
   }
 
@@ -119,8 +122,8 @@ class AIProviderManager {
 
   async generateCommitMessage(diff, options = {}) {
     const {
-      provider: preferredProvider = 'auto',
-      conventional = false,
+      provider: preferredProvider = this.config.provider || 'auto',
+      conventional = this.config.conventional || false,
       body = false,
       verbose = false
     } = options;
@@ -137,8 +140,6 @@ class AIProviderManager {
 
     for (const provider of providerChain) {
       try {
-        if (verbose) Progress.info(`Trying provider: ${provider}`);
-
         if (provider === 'local') {
           const result = await this.generateLocalHeuristic(diff, options);
           this.setCache(cacheKey, result, true);
@@ -167,17 +168,21 @@ class AIProviderManager {
   buildProviderChain(preferred) {
     const available = [];
 
+    // First, try the preferred provider if its key is available
     if (preferred !== 'auto' && preferred !== 'none') {
-      const resolved = this.resolveProvider(preferred);
-      if (resolved !== 'none') available.push(resolved);
-    } else if (preferred === 'auto') {
-      if (process.env.GEMINI_API_KEY) available.push('gemini');
-      if (process.env.OPENAI_API_KEY) available.push('openai');
-      if (process.env.GROQ_API_KEY) available.push('groq');
+      if (preferred === 'gemini' && process.env.GEMINI_API_KEY) available.push('gemini');
+      else if (preferred === 'openai' && process.env.OPENAI_API_KEY) available.push('openai');
+      else if (preferred === 'groq' && process.env.GROQ_API_KEY) available.push('groq');
     }
 
+    // Then add all other available providers as fallbacks
+    if (process.env.GEMINI_API_KEY && !available.includes('gemini')) available.push('gemini');
+    if (process.env.OPENAI_API_KEY && !available.includes('openai')) available.push('openai');
+    if (process.env.GROQ_API_KEY && !available.includes('groq')) available.push('groq');
+
+    // Local heuristics as final fallback
     available.push('local');
-    return [...new Set(available)];
+    return available;
   }
 
   buildPrompt(diff, options) {
