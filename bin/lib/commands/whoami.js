@@ -8,6 +8,12 @@ class WhoAmICommand {
 
     async run() {
         const pkg = require('../../../package.json');
+
+        // Get SSOT version from S4 (Tags)
+        const { S4Versioning } = require('../utils/s4');
+        const s4 = new S4Versioning(this.git);
+        const version = (await s4.getCurrentVersion()) || pkg.version;
+
         const user = os.userInfo().username;
         const hostname = os.hostname();
         const platform = os.platform();
@@ -32,7 +38,7 @@ class WhoAmICommand {
         console.log(`└─ Email:    ${color.cyan(gitEmail)}`);
 
         console.log(`\n${color.green('TOOL_METRICS')}`);
-        console.log(`├─ Version:  ${color.magenta(pkg.version)}`);
+        console.log(`├─ Version:  ${color.magenta(version)}`);
         console.log(`├─ Engine:   Node ${process.version}`);
         console.log(`└─ Author:   ${pkg.author}`);
 
