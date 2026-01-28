@@ -77,6 +77,8 @@ g o                         # That's it. AI handles the rest.
 | `g oneshot` | `g o` | Stage all → AI commit → Push (full workflow) |
 | `g local` | `g l` | Stage all → AI commit (no push) |
 | `g suggest` | `g sg` | Get AI commit message suggestions |
+| `g version` | `g v` | Manage project version (S4 system) |
+| `g whoami` | — | Show system identity & version |
 | `g wip` | — | Quick work-in-progress commit |
 
 ### 📊 Analytics & Review
@@ -111,6 +113,25 @@ g o                         # That's it. AI handles the rest.
 | `g amend` | `g a` | Amend the previous commit |
 | `g undo` | `g u` | Undo last commit (keep changes) |
 | `g delete-branch` | `g del` | Delete branch locally and remotely |
+
+### 🔢 S4 Versioning (New)
+
+GIMS now uses the **S4 Versioning System**, a forensic-grade versioning standard stored entirely in **Git Tags**.
+
+`MAJOR.MINOR.PATCH-STAGE.BUILD+DATE.TIME.COMMIT.BRANCH`
+*(e.g., `0.8.2-dev.1+20250129.1305.af8d9c.main`)*
+
+| Command | Description |
+|---------|-------------|
+| `g v` | Smart bump (resets build on new day) + Create Tag |
+| `g v -n` | Dry run (preview next version) |
+| `g v major` | Force major bump (`1.0.0` → `2.0.0`) |
+| `g v --list` | List stable releases (hides dev tags) |
+| `g v --prune` | Delete old `dev` tags (keeps last 10) |
+| `g v -i` | Version analysis with timestamp |
+| `g whoami` | Dynamic identity & version banner |
+
+> **Note:** S4 uses Git Tags as the Single Source of Truth. No `VERSION` file is created. It updates your `.env` version variables if they exist.
 
 ### 🔧 Setup & Config
 
