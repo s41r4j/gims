@@ -16,6 +16,8 @@ const { GitAnalyzer } = require('./lib/git/analyzer');
 const { AIProviderManager } = require('./lib/ai/providers');
 const { InteractiveCommands } = require('./lib/commands/interactive');
 const { Intelligence } = require('./lib/utils/intelligence');
+const { VersionCommand } = require('./lib/commands/version');
+const { WhoAmICommand } = require('./lib/commands/whoami');
 
 const program = new Command();
 const git = simpleGit();
@@ -25,6 +27,18 @@ const configManager = new ConfigManager();
 const gitAnalyzer = new GitAnalyzer(git);
 let aiProvider;
 let interactive;
+let versionCmd;
+let whoAmI;
+
+// ... (getOpts function remains) ...
+
+function initializeComponents() {
+  const config = configManager.load();
+  aiProvider = new AIProviderManager(config);
+  interactive = new InteractiveCommands(git, aiProvider, gitAnalyzer);
+  versionCmd = new VersionCommand(git, configManager);
+  whoAmI = new WhoAmICommand(git);
+}
 
 function getOpts() {
   const cfg = configManager.load();
@@ -47,11 +61,7 @@ function getOpts() {
   };
 }
 
-function initializeComponents() {
-  const config = configManager.load();
-  aiProvider = new AIProviderManager(config);
-  interactive = new InteractiveCommands(git, aiProvider, gitAnalyzer);
-}
+
 
 async function ensureRepo() {
   const isRepo = await git.checkIsRepo();
@@ -138,7 +148,7 @@ async function hasChanges() {
 program
   .name('gims')
   .alias('g')
-  .version(require('../package.json').version, '-v, --version', 'Output the version number')
+  .version(require('../package.json').version, '--version', 'Output the version number') // Removed -v
   .option('--provider <name>', 'AI provider: auto|openai|gemini|groq|none')
   .option('--model <name>', 'Model identifier for provider')
   .option('--staged-only', 'Use only staged changes (default for suggest)')
@@ -769,6 +779,33 @@ program.command('stash')
       }
     } catch (e) {
       handleError('Stash error', e);
+    }
+  });
+
+program.command('version').alias('v')
+  .description('Manage S4 version (smart bump by default)')
+  .argument('[type]', 'bump type: major, minor, patch, auto', 'auto')
+  .option('-s, --stage <stage>', 'Set prerelease stage (dev, alpha, beta, rc, stable)')
+  .option('-n, --dry-run', 'Show next version without applying')
+  .option('-i, --info', 'Show info about current version')
+  .action(async (type, options) => {
+    await ensureRepo();
+    if (!versionCmd) initializeComponents();
+    try {
+      await versionCmd.run(type, options);
+    } catch (e) {
+      handleError('Version error', e);
+    }
+  });
+
+program.command('whoami')
+  .description('Show system and tool identity status')
+  .action(async () => {
+    try {
+      if (!whoAmI) initializeComponents();
+      await whoAmI.run();
+    } catch (e) {
+      handleError('WhoAmI error', e);
     }
   });
 

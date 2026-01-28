@@ -15,7 +15,7 @@ class AIProviderManager {
 
   resolveProvider(preference = 'auto') {
     if (preference === 'none') return 'none';
-    
+
     // Check if preferred provider's key is available
     if (preference === 'openai' && process.env.OPENAI_API_KEY) return 'openai';
     if (preference === 'gemini' && process.env.GEMINI_API_KEY) return 'gemini';
@@ -25,7 +25,7 @@ class AIProviderManager {
     if (process.env.GEMINI_API_KEY) return 'gemini';
     if (process.env.OPENAI_API_KEY) return 'openai';
     if (process.env.GROQ_API_KEY) return 'groq';
-    
+
     return 'none';
   }
 
@@ -90,7 +90,14 @@ class AIProviderManager {
       model: actualModel,
       contents: prompt,
     });
-    return (await response.response.text()).trim();
+
+    // Handle @google/genai v1.5+ raw response structure
+    if (response && response.candidates && response.candidates.length > 0) {
+      const parts = response.candidates[0].content.parts;
+      return parts.map(p => p.text || '').join('').trim();
+    }
+
+    return '';
   }
 
   async generateWithOpenAI(prompt, model, options) {
