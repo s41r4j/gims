@@ -1,6 +1,10 @@
 <div align="center">
 
-# 🚀 GIMS - Git Made Simple
+<!--
+# GIMS - Git Made Simple
+-->
+
+<img width="1658" height="609" alt="gims" src="https://github.com/user-attachments/assets/fd4ae515-9674-4cc2-8ea0-39d21e82e274" />
 
 [![npm version](https://img.shields.io/npm/v/gims.svg)](https://npmjs.org/package/gims)
 [![npm downloads](https://img.shields.io/npm/dm/gims.svg)](https://npmjs.org/package/gims)
