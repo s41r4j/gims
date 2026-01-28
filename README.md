@@ -116,7 +116,7 @@ g o                         # That's it. AI handles the rest.
 
 ### 🔢 S4 Versioning (New)
 
-GIMS now uses the **S4 Versioning System**, a forensic-grade versioning standard stored entirely in **Git Tags**.
+GIMS now uses the **[S4 Versioning System](https://github.com/s41r4j/s4vs)**, a forensic-grade versioning standard stored entirely in **Git Tags**.
 
 `MAJOR.MINOR.PATCH-STAGE.BUILD+DATE.TIME.COMMIT.BRANCH`
 *(e.g., `0.8.2-dev.1+20250129.1305.af8d9c.main`)*
