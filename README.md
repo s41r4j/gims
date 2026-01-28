@@ -132,6 +132,7 @@ GIMS now uses the **[S4 Versioning System](https://github.com/s41r4j/s4vs)**, a 
 | `g v major` | Force major bump (`1.0.0` → `2.0.0`) |
 | `g v --list` | List stable releases (hides dev tags) |
 | `g v --prune` | Delete old `dev` tags (keeps last 10) |
+| `g v --undo` | Undo last version bump (delete latest tag) |
 | `g v -i` | Version analysis with timestamp |
 | `g whoami` | Dynamic identity & version banner |
 
