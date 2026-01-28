@@ -211,13 +211,21 @@ class VersionCommand {
         const M = parsed.time.substring(2, 4);
         const dateObj = new Date(`${y}-${m}-${d}T${H}:${M}:00`);
 
+        // 12-hour format logic
+        let hour = parseInt(H);
+        const ampm = hour >= 12 ? 'PM' : 'AM';
+        hour = hour % 12;
+        hour = hour ? hour : 12; // the hour '0' should be '12'
+        const time12 = `${hour}:${M} ${ampm}`;
+
         console.log(color.bold('\nS4 Version Analysis:'));
         console.log(`Major: ${parsed.major}`);
         console.log(`Minor: ${parsed.minor}`);
         console.log(`Patch: ${parsed.patch}`);
         console.log(`Stage: ${color.magenta(parsed.stage)}`);
         console.log(`Build: ${parsed.build}`);
-        console.log(`Time:  ${dateObj.toDateString()} @ ${H}:${M}`);
+        console.log(`Date:  ${dateObj.toDateString()}`);
+        console.log(`Time:  ${time12} (${H}:${M})`);
         console.log(`Git:   ${parsed.branch} (${parsed.commit})`);
     }
 }
