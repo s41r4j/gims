@@ -203,13 +203,21 @@ class VersionCommand {
             return;
         }
 
+        // Format date/time
+        const y = parsed.date.substring(0, 4);
+        const m = parsed.date.substring(4, 6);
+        const d = parsed.date.substring(6, 8);
+        const H = parsed.time.substring(0, 2);
+        const M = parsed.time.substring(2, 4);
+        const dateObj = new Date(`${y}-${m}-${d}T${H}:${M}:00`);
+
         console.log(color.bold('\nS4 Version Analysis:'));
         console.log(`Major: ${parsed.major}`);
         console.log(`Minor: ${parsed.minor}`);
         console.log(`Patch: ${parsed.patch}`);
         console.log(`Stage: ${color.magenta(parsed.stage)}`);
         console.log(`Build: ${parsed.build}`);
-        console.log(`Time:  ${parsed.date} @ ${parsed.time}`);
+        console.log(`Time:  ${dateObj.toDateString()} @ ${H}:${M}`);
         console.log(`Git:   ${parsed.branch} (${parsed.commit})`);
     }
 }

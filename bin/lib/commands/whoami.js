@@ -37,8 +37,22 @@ class WhoAmICommand {
         console.log(`├─ Name:     ${color.cyan(gitUser)}`);
         console.log(`└─ Email:    ${color.cyan(gitEmail)}`);
 
+        // Parse S4 date/time if available
+        let builtAt = 'unknown';
+        const parsed = S4Versioning.parse(version);
+        if (parsed) {
+            const y = parsed.date.substring(0, 4);
+            const m = parsed.date.substring(4, 6);
+            const d = parsed.date.substring(6, 8);
+            const H = parsed.time.substring(0, 2);
+            const M = parsed.time.substring(2, 4);
+            const dateObj = new Date(`${y}-${m}-${d}T${H}:${M}:00`);
+            builtAt = `${dateObj.toDateString()} @ ${H}:${M}`;
+        }
+
         console.log(`\n${color.green('TOOL_METRICS')}`);
         console.log(`├─ Version:  ${color.magenta(version)}`);
+        console.log(`├─ Built:    ${builtAt}`);
         console.log(`├─ Engine:   Node ${process.version}`);
         console.log(`└─ Author:   ${pkg.author}`);
 
