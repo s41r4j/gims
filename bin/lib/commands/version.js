@@ -12,17 +12,35 @@ class VersionCommand {
     }
 
     async run(type = 'auto', options = {}) {
-        const { info, dryRun, stage } = options;
+        const { info, dryRun, stage, list, prune, all } = options;
 
         try {
-            // 1. Get current version
-            const currentVersion = await this.getCurrentVersion();
+            // --- Special Commands: List & Prune ---
+            if (list) {
+                await this.listTags(all);
+                return;
+            }
+
+            if (prune) {
+                await this.pruneTags();
+                return;
+            }
+
+            // --- Main Bump Logic ---
+
+            // 1. Get current version from Git Tags (SSOT)
+            let currentVersion = await this.s4.getCurrentVersion();
+            let source = 'git-tag';
+
+            // Fallback: If no tags, check package.json just for migration base
             if (!currentVersion) {
-                throw new Error('Could not find version in package.json or VERSION file');
+                currentVersion = this.getPackageJsonVersion() || '0.0.0';
+                source = 'package.json (fallback)';
             }
 
             // 2. Info mode
             if (info) {
+                console.log(`Current Version: ${color.green(currentVersion)} (${source})`);
                 this.showInfo(currentVersion);
                 return;
             }
@@ -41,56 +59,36 @@ class VersionCommand {
                 return;
             }
 
-            // 5. Update files
+            // 5. Execution (Tag + .env)
             console.log(`\nBumping version: ${color.dim(currentVersion)} → ${color.green(nextVersion)}`);
 
             const updatedFiles = [];
 
-            // Update package.json
-            if (this.updatePackageJson(nextVersion)) updatedFiles.push('package.json');
-
-            // Update .env
+            // Update .env (Only if exists)
             const envUpdates = this.updateEnvFiles(nextVersion);
             updatedFiles.push(...envUpdates);
 
-            // Create VERSION file if it doesn't exist or update it
-            fs.writeFileSync('VERSION', nextVersion);
-            updatedFiles.push('VERSION');
-
             if (updatedFiles.length > 0) {
                 console.log(`${color.green('✔')} Updated ${updatedFiles.join(', ')}`);
+                // Stage .env updates if any (usually gitignored, but if not...)
+                // We won't auto-commit them to avoid messing with user's git config too much logic
+                // But usually .env is ignored.
             }
 
-            // 6. Git commit and tag
-            await this.createRelease(nextVersion, updatedFiles);
+            // 6. Create Git Tag (The Truth)
+            await this.createTag(nextVersion);
 
         } catch (error) {
             Progress.error(`Version bump failed: ${error.message}`);
         }
     }
 
-    async getCurrentVersion() {
-        // Try package.json
+    getPackageJsonVersion() {
         if (fs.existsSync('package.json')) {
             const pkg = JSON.parse(fs.readFileSync('package.json', 'utf8'));
-            if (pkg.version) return pkg.version;
+            return pkg.version;
         }
-
-        // Try VERSION file
-        if (fs.existsSync('VERSION')) {
-            return fs.readFileSync('VERSION', 'utf8').trim();
-        }
-
-        return '0.0.0'; // Default start
-    }
-
-    updatePackageJson(newVersion) {
-        if (!fs.existsSync('package.json')) return false;
-
-        const pkg = JSON.parse(fs.readFileSync('package.json', 'utf8'));
-        pkg.version = newVersion;
-        fs.writeFileSync('package.json', JSON.stringify(pkg, null, 2) + '\n');
-        return true;
+        return null;
     }
 
     updateEnvFiles(newVersion) {
@@ -102,14 +100,12 @@ class VersionCommand {
                 let content = fs.readFileSync(file, 'utf8');
                 let changed = false;
 
-                // Match VERSION=... or APP_VERSION=...
-                const regex = /^(VERSION|APP_VERSION|NEXT_PUBLIC_VERSION)=(.*)$/gm;
+                // Match common version vars
+                const regex = /^(VERSION|APP_VERSION|NEXT_PUBLIC_VERSION|REACT_APP_VERSION|S4_VERSION)=(.*)$/gm;
 
                 if (regex.test(content)) {
                     content = content.replace(regex, `$1=${newVersion}`);
                     changed = true;
-                } else {
-                    // Optionally append if missing? Maybe too aggressive.
                 }
 
                 if (changed) {
@@ -122,23 +118,82 @@ class VersionCommand {
         return updates;
     }
 
-    async createRelease(version, files) {
+    async createTag(version) {
         try {
-            // Stage files
-            await this.git.add(files);
-
-            // Commit
-            const msg = `chore(release): bump to ${version}`;
-            await this.git.commit(msg);
-
-            // Tag
+            // Create lightweight or annotated tag? S4 recommends annotated.
             await this.git.addAnnotatedTag(version, `Release ${version}`);
-
-            console.log(`${color.green('✔')} Created git commit and tag: ${color.cyan(version)}`);
-            console.log(`\nRun ${color.cyan('g push --follow-tags')} to publish`);
+            console.log(`${color.green('✔')} Created git tag: ${color.cyan(version)}`);
+            console.log(`\nRun ${color.cyan('g push --tags')} to publish`);
         } catch (e) {
-            console.log(color.yellow(`⚠ Git operations failed: ${e.message}`));
+            console.log(color.yellow(`⚠ Git tag failed: ${e.message}`));
         }
+    }
+
+    async listTags(showAll) {
+        const tags = await this.git.tags();
+        if (!tags.all.length) {
+            console.log('No tags found.');
+            return;
+        }
+
+        console.log(color.bold('\nRelease History:'));
+
+        // Reverse order (newest first)
+        // Filter out dev tags unless --all
+        const filtered = tags.all.filter(t => {
+            if (showAll) return true;
+            return !t.includes('-dev.');
+        }).reverse();
+
+        if (filtered.length === 0) {
+            console.log(color.dim('No stable/beta/rc tags found. Use --all to see dev tags.'));
+            return;
+        }
+
+        filtered.forEach(t => {
+            console.log(`- ${t}`);
+        });
+    }
+
+    async pruneTags() {
+        Progress.start('Pruning old dev tags...');
+        const tags = await this.git.tags();
+        const allTags = tags.all;
+
+        // Identify dev tags
+        const devTags = allTags.filter(t => t.includes('-dev.'));
+
+        // Sort them ensuring we keep the newest
+        // (Using simple string sort works roughly if S4 format is strictly kept, 
+        // but better to rely on S4 parse if possible. For simplicity here, we assume standard S4)
+
+        // We want to KEEP the last 10 dev tags.
+        if (devTags.length <= 10) {
+            Progress.stop('');
+            console.log('Fewer than 10 dev tags. No pruning needed.');
+            return;
+        }
+
+        // Identify tags to delete (older ones)
+        // S4 strings sort chronologically well enough lexicographically mostly, 
+        // but let's trust the array order returned by git tags usually... 
+        // actually git tags return is arbitrary.
+
+        // Let's use our S4 sorter from utility if possible, or just simple sort
+        // Assuming S4Versioning.getCurrentVersion logic uses sort, we can reuse it? 
+        // Or just simple sort for now.
+        devTags.sort(); // Lexicographical sort (older dates come first: 2025... < 2026...)
+
+        const toKeep = 10;
+        const toDelete = devTags.slice(0, devTags.length - toKeep);
+
+        for (const tag of toDelete) {
+            await this.git.tag(['-d', tag]);
+        }
+
+        Progress.stop('');
+        console.log(`${color.green('✔')} Deleted ${toDelete.length} old dev tags.`);
+        console.log(color.dim('Kept last 10 dev tags + all stable tags.'));
     }
 
     showInfo(versionStr) {

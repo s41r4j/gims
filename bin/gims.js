@@ -788,6 +788,9 @@ program.command('version').alias('v')
   .option('-s, --stage <stage>', 'Set prerelease stage (dev, alpha, beta, rc, stable)')
   .option('-n, --dry-run', 'Show next version without applying')
   .option('-i, --info', 'Show info about current version')
+  .option('--list', 'List S4 tags (hides dev tags by default)')
+  .option('--prune', 'Prune old dev tags (keeps last 10)')
+  .option('--all', 'Show all tags (including dev) when listing')
   .action(async (type, options) => {
     await ensureRepo();
     if (!versionCmd) initializeComponents();

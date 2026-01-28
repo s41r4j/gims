@@ -16,6 +16,7 @@ class S4Versioning {
      * Parse an S4 version string into components
      */
     static parse(versionStr) {
+        if (!versionStr) return null;
         const match = versionStr.match(S4Versioning.REGEX);
         if (!match) return null;
 
@@ -39,6 +40,62 @@ class S4Versioning {
     static stringify(components) {
         const { major, minor, patch, stage, build, date, time, commit, branch } = components;
         return `${major}.${minor}.${patch}-${stage}.${build}+${date}.${time}.${commit}.${branch}`;
+    }
+
+    /**
+     * Get the latest S4 version from Git Tags
+     */
+    async getCurrentVersion() {
+        try {
+            // Get all tags
+            const tags = await this.git.tags();
+            if (!tags.all || tags.all.length === 0) {
+                return null; // No tags yet
+            }
+
+            // Filter and sort S4 tags
+            // Sorting strategy: We rely on the date+time in the S4 string for chronological order
+            // but S4 strings format puts SemVer first.
+            // Let's parse all valid S4 tags and sort them.
+
+            const parsedTags = tags.all
+                .map(t => ({ tag: t, parsed: S4Versioning.parse(t) }))
+                .filter(item => item.parsed !== null);
+
+            if (parsedTags.length === 0) return null;
+
+            // Sort logic: 
+            // 1. Major.Minor.Patch
+            // 2. Date.Time
+            // 3. Build
+
+            parsedTags.sort((a, b) => {
+                const pA = a.parsed;
+                const pB = b.parsed;
+
+                if (pA.major !== pB.major) return pA.major - pB.major;
+                if (pA.minor !== pB.minor) return pA.minor - pB.minor;
+                if (pA.patch !== pB.patch) return pA.patch - pB.patch;
+
+                // Compare Date (YYYYMMDD)
+                const dateA = parseInt(pA.date);
+                const dateB = parseInt(pB.date);
+                if (dateA !== dateB) return dateA - dateB;
+
+                // Compare Time (HHMM)
+                const timeA = parseInt(pA.time);
+                const timeB = parseInt(pB.time);
+                if (timeA !== timeB) return timeA - timeB;
+
+                return pA.build - pB.build;
+            });
+
+            // Return the latest
+            return parsedTags[parsedTags.length - 1].tag;
+
+        } catch (e) {
+            return null;
+        }
     }
 
     /**
@@ -114,11 +171,7 @@ class S4Versioning {
         // Handle stage change
         if (stageVal && stageVal !== parsed.stage) {
             next.stage = stageVal;
-            next.build = 1; // Stage change resets build usually? S4 "Sequence" implies uniqueness.
-            // S4 doc: "When to Increment: Each new build of the same version on the same day"
-            // Changing stage is effectively a new version identity.
-        } else {
-            // Keep existing stage if not specified
+            next.build = 1;
         }
 
         // Logic for bumping
@@ -147,14 +200,13 @@ class S4Versioning {
                 }
                 // 2. If Date is SAME
                 else {
-                    // If Commit Changed -> It's a new build of the same day
+                    // If Commit Changed -> new build
                     if (parsed.commit !== ctx.commit) {
                         next.build = parsed.build + 1;
                     }
-                    // If Commit is SAME and user requested bump, force build increment?
-                    // "auto" implies we just want the "next" logical version for the current state.
-                    // If nothing changed, maybe we shouldn't bump? 
-                    // But usually CI calls this to FORCE a new version.
+                    // If same commit & same date, usually we don't need a new tag 
+                    // unless user forces it. 
+                    // For safety, increment build to ensure uniqueness if they insisted on running `g v`.
                     else {
                         next.build = parsed.build + 1;
                     }
