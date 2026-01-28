@@ -791,6 +791,7 @@ program.command('version').alias('v')
   .option('--list', 'List S4 tags (hides dev tags by default)')
   .option('--prune', 'Prune old dev tags (keeps last 10)')
   .option('--all', 'Show all tags (including dev) when listing')
+  .option('-u, --undo', 'Undo the last version bump (delete latest tag)')
   .action(async (type, options) => {
     await ensureRepo();
     if (!versionCmd) initializeComponents();

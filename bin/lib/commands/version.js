@@ -26,6 +26,11 @@ class VersionCommand {
                 return;
             }
 
+            if (options.undo) {
+                await this.undoLastBump();
+                return;
+            }
+
             // --- Main Bump Logic ---
 
             // 1. Get current version from Git Tags (SSOT)
@@ -194,6 +199,44 @@ class VersionCommand {
         Progress.stop('');
         console.log(`${color.green('✔')} Deleted ${toDelete.length} old dev tags.`);
         console.log(color.dim('Kept last 10 dev tags + all stable tags.'));
+    }
+
+    async undoLastBump() {
+        Progress.start('Undoing last version bump...');
+
+        // 1. Get current version (the one to delete)
+        const currentVersion = await this.s4.getCurrentVersion();
+
+        if (!currentVersion) {
+            Progress.stop('');
+            console.log(color.yellow('No S4 version tags found to undo.'));
+            return;
+        }
+
+        // 2. Delete the tag
+        try {
+            await this.git.tag(['-d', currentVersion]);
+            Progress.stop('');
+            console.log(`${color.green('✔')} Deleted tag: ${color.cyan(currentVersion)}`);
+        } catch (e) {
+            Progress.error(`Failed to delete tag: ${e.message}`);
+            return;
+        }
+
+        // 3. Revert .env files to *previous* version
+        // Now that the latest tag is gone, getCurrentVersion will return the previous one
+        const previousVersion = await this.s4.getCurrentVersion() || '0.0.0';
+
+        if (previousVersion) {
+            console.log(`Reverting environment to previous version: ${color.dim(previousVersion)}`);
+            const updatedFiles = this.updateEnvFiles(previousVersion);
+            if (updatedFiles.length > 0) {
+                console.log(`${color.green('✔')} Updated ${updatedFiles.join(', ')}`);
+            }
+        }
+
+        console.log(color.dim('\nNote: If you already pushed the tag, you must verify deletion on remote:'));
+        console.log(`  ${color.cyan(`git push --delete origin ${currentVersion}`)}`);
     }
 
     showInfo(versionStr) {
