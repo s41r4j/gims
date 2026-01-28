@@ -341,22 +341,22 @@ program.command('help', { isDefault: true })
       {
         title: '🤖 AI & Core Workflow',
         cmds: [
-          { name: 'g s', desc: 'Status with AI insights' },
-          { name: 'g o', desc: 'Auto-stage + AI commit + Push' },
-          { name: 'g l', desc: 'Auto-stage + AI commit (local)' },
-          { name: 'g r', desc: 'AI Code Review detected changes' },
-          { name: 'g sg', desc: 'Get AI message suggestions' },
-          { name: 'g int', desc: 'Interactive commit wizard' }
+          { name: 'g s | status', desc: 'Status with AI insights' },
+          { name: 'g o | online', desc: 'Auto-stage + AI commit + Push' },
+          { name: 'g l | local', desc: 'Auto-stage + AI commit (local)' },
+          { name: 'g r | review', desc: 'AI Code Review detected changes' },
+          { name: 'g sg | suggest', desc: 'Get AI message suggestions' },
+          { name: 'g int | interactive', desc: 'Interactive commit wizard' }
         ]
       },
       {
         title: '🔄 Sync & Maintenance',
         cmds: [
-          { name: 'g sp', desc: 'Safe pull (stash -> pull -> pop)' },
+          { name: 'g sp | safe-pull', desc: 'Safe pull (stash -> pull -> pop)' },
           { name: 'g sync', desc: 'Smart sync (pull + rebase/merge)' },
-          { name: 'g fix', desc: 'Fix branch sync issues' },
+          { name: 'g f | fix', desc: 'Fix branch sync issues' },
           { name: 'g main', desc: 'Switch to main & pull latest' },
-          { name: 'g clean', desc: 'Remove dead local branches' },
+          { name: 'g clean | cleanup', desc: 'Remove dead local branches' },
           { name: 'g del', desc: 'Delete branch (local + remote)' },
           { name: 'g pull', desc: 'Standard git pull' },
           { name: 'g push', desc: 'Standard git push' }
@@ -365,47 +365,47 @@ program.command('help', { isDefault: true })
       {
         title: '📜 History & Inspection',
         cmds: [
-          { name: 'g ls', desc: 'Compact commit history' },
-          { name: 'g ll', desc: 'Detailed commit history' },
+          { name: 'g ls | list', desc: 'Compact commit history' },
+          { name: 'g ll | largelist', desc: 'Detailed commit history' },
           { name: 'g last', desc: 'Show last commit diff' },
-          { name: 'g t', desc: 'Show commits made today' },
+          { name: 'g t | today', desc: 'Show commits made today' },
           { name: 'g stats', desc: 'Personal commit statistics' },
-          { name: 'g w', desc: 'Show system identity (whoami)' },
-          { name: 'g p', desc: 'Preview commit message' }
+          { name: 'g w | whoami', desc: 'Show system identity' },
+          { name: 'g p | preview', desc: 'Preview commit message' }
         ]
       },
       {
         title: '📦 Stashing & Work-in-Progress',
         cmds: [
-          { name: 'g ss', desc: 'Quick stash save' },
-          { name: 'g pop', desc: 'Pop latest stash' },
+          { name: 'g ss | stash-save', desc: 'Quick stash save' },
+          { name: 'g pop | stash-pop', desc: 'Pop latest stash' },
           { name: 'g stash', desc: 'Enhanced stash management' },
           { name: 'g wip', desc: 'Quick work-in-progress commit' },
           { name: 'g split', desc: 'Split large changesets' },
-          { name: 'g us', desc: 'Unstage all files' },
-          { name: 'g x', desc: 'Discard all changes' }
+          { name: 'g us | unstage', desc: 'Unstage all files' },
+          { name: 'g x | discard', desc: 'Discard all changes' }
         ]
       },
       {
         title: '🌿 Branching & Undo',
         cmds: [
-          { name: 'g b', desc: 'Create branch from commit' },
-          { name: 'g u', desc: 'Undo last commit' },
-          { name: 'g a', desc: 'Amend last commit' },
-          { name: 'g rs', desc: 'Reset branch to commit' },
-          { name: 'g rv', desc: 'Revert commit safely' },
+          { name: 'g b | branch', desc: 'List or create branches' },
+          { name: 'g u | undo', desc: 'Undo last commit' },
+          { name: 'g a | amend', desc: 'Amend last commit' },
+          { name: 'g rs | reset', desc: 'Reset branch to commit' },
+          { name: 'g rv | revert', desc: 'Revert commit safely' },
           { name: 'g conflicts', desc: 'Resolve merge conflicts' }
         ]
       },
       {
         title: '🔧 Config & Utilities',
         cmds: [
-          { name: 'g v', desc: 'S4 Version management' },
+          { name: 'g v | version', desc: 'S4 Version management' },
           { name: 'g setup', desc: 'Run setup wizard' },
           { name: 'g config', desc: 'Manage configuration' },
           { name: 'g init', desc: 'Initialize new repo' },
           { name: 'g clone', desc: 'Clone a repository' },
-          { name: 'g m', desc: 'Commit with custom message' }
+          { name: 'g m | commit', desc: 'Commit with custom message' }
         ]
       }
     ];
@@ -1005,11 +1005,31 @@ program.command('history').alias('h')
     }
   });
 
-program.command('branch <c> [name]').alias('b')
-  .description('Branch from commit/index')
+program.command('branch [c] [name]').alias('b')
+  .description('List branches or branch from commit/index')
   .action(async (c, name) => {
     await ensureRepo();
-    try { const sha = await resolveCommit(c); const br = name || `branch-${sha.slice(0, 7)}`; await git.checkout(['-b', br, sha]); console.log(`Switched to branch ${br} at ${sha}`); }
+    try {
+      if (!c) {
+        // List branches
+        const branches = await git.branchLocal();
+        console.log(color.bold('\n🌿 Local Branches:\n'));
+        branches.all.forEach(b => {
+          if (b === branches.current) {
+            console.log(`  ${color.green('* ' + b)}`);
+          } else {
+            console.log(`    ${b}`);
+          }
+        });
+        console.log('');
+      } else {
+        // Create branch
+        const sha = await resolveCommit(c);
+        const br = name || `branch-${sha.slice(0, 7)}`;
+        await git.checkout(['-b', br, sha]);
+        console.log(`Switched to branch ${br} at ${sha}`);
+      }
+    }
     catch (e) { handleError('Branch error', e); }
   });
 
@@ -1589,7 +1609,7 @@ program.command('last')
 
 // ===== SMART SYNC FIX COMMAND =====
 
-program.command('fix')
+program.command('fix').alias('f')
   .description('Smart fix for branch sync issues (diverged, behind, ahead)')
   .option('--local', 'Keep local changes, force push to remote')
   .option('--remote', 'Keep remote changes, discard local')
