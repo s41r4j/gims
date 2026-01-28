@@ -1719,44 +1719,31 @@ program.command('fix')
         }
         return;
       }
-      console.log(`\n${color.bold('🤖 AI Analysis:')}`);
-      console.log(response.trim());
-    } catch (e) {
-      Progress.stop('');
-      console.log(color.yellow('AI Analysis failed, falling back to heuristics.'));
-      // ... heuristic fallback code ...
-      let rec = '';
-      if (ahead > 0 && behind === 0) rec = 'Push (g push)';
-      else if (behind > 0 && ahead === 0) rec = 'Pull (g pull)';
-      else rec = 'Rebase (g fix --rebase)';
-      console.log(`Recommendation: ${rec}`);
-    }
-    return;
-  }
+
 
       // Show interactive menu
       console.log(color.bold('🔧 Fix Options:\n'));
 
-if (situation === 'ahead') {
-  console.log(`  ${color.cyan('g push')}           Push your commits to remote`);
-} else if (situation === 'behind') {
-  console.log(`  ${color.cyan('g pull')}           Get remote commits (fast-forward)`);
-  console.log(`  ${color.cyan('g sp')}             Safe pull (stash → pull → pop)`);
-} else {
-  // Diverged
-  console.log(`  ${color.cyan('g fix --merge')}    Merge remote into local (creates merge commit)`);
-  console.log(`  ${color.cyan('g fix --rebase')}   Rebase local onto remote (linear history)`);
-  console.log(color.dim('  ─────────────────'));
-  console.log(`  ${color.cyan('g fix --local')}    ${color.yellow('⚠')} Force push local, overwrite remote`);
-  console.log(`  ${color.cyan('g fix --remote')}   ${color.yellow('⚠')} Reset to remote, discard local commits`);
-}
+      if (situation === 'ahead') {
+        console.log(`  ${color.cyan('g push')}           Push your commits to remote`);
+      } else if (situation === 'behind') {
+        console.log(`  ${color.cyan('g pull')}           Get remote commits (fast-forward)`);
+        console.log(`  ${color.cyan('g sp')}             Safe pull (stash → pull → pop)`);
+      } else {
+        // Diverged
+        console.log(`  ${color.cyan('g fix --merge')}    Merge remote into local (creates merge commit)`);
+        console.log(`  ${color.cyan('g fix --rebase')}   Rebase local onto remote (linear history)`);
+        console.log(color.dim('  ─────────────────'));
+        console.log(`  ${color.cyan('g fix --local')}    ${color.yellow('⚠')} Force push local, overwrite remote`);
+        console.log(`  ${color.cyan('g fix --remote')}   ${color.yellow('⚠')} Reset to remote, discard local commits`);
+      }
 
-console.log(color.dim('  ─────────────────'));
-console.log(`  ${color.cyan('g fix --ai')}       Get AI recommendation`);
+      console.log(color.dim('  ─────────────────'));
+      console.log(`  ${color.cyan('g fix --ai')}       Get AI recommendation`);
 
     } catch (e) {
-  handleError('Fix error', e);
-}
+      handleError('Fix error', e);
+    }
   });
 
 program.command('conflicts')
