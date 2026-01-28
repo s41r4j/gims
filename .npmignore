@@ -1,0 +1,23 @@
+# NPM Ignore
+.git
+.github
+.gitignore
+.DS_Store
+.env*
+test/
+tests/
+examples/
+scripts/
+docs/
+mcp/
+AI.md
+*.log
+coverage/
+node_modules/
+
+# Keep bin and library code
+!bin/
+!package.json
+!README.md
+!LICENSE
+!CHANGELOG.md

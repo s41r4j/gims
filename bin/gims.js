@@ -332,38 +332,96 @@ program.command('config')
     }
   });
 
-program.command('quick-help').alias('q')
-  .description('Show quick reference for main commands')
+program.command('help', { isDefault: true })
+  .description('Show structured help menu')
   .action(() => {
-    console.log(color.bold('🚀 GIMS Quick Reference\n'));
+    console.log(color.bold('\n🚀 GIMS - Git Made Simple\n'));
 
-    console.log(color.bold('Core Workflow:'));
-    console.log(`  ${color.cyan('g s')}      Status with AI insights`);
-    console.log(`  ${color.cyan('g o')}      AI commit + push`);
-    console.log(`  ${color.cyan('g l')}      AI commit locally`);
-    console.log(`  ${color.cyan('g wip')}    Quick WIP commit\n`);
+    const sections = [
+      {
+        title: '🤖 AI & Core Workflow',
+        cmds: [
+          { name: 'g s', desc: 'Status with AI insights' },
+          { name: 'g o', desc: 'Auto-stage + AI commit + Push' },
+          { name: 'g l', desc: 'Auto-stage + AI commit (local)' },
+          { name: 'g r', desc: 'AI Code Review detected changes' },
+          { name: 'g sg', desc: 'Get AI message suggestions' },
+          { name: 'g int', desc: 'Interactive commit wizard' }
+        ]
+      },
+      {
+        title: '🔄 Sync & Maintenance',
+        cmds: [
+          { name: 'g sp', desc: 'Safe pull (stash -> pull -> pop)' },
+          { name: 'g sync', desc: 'Smart sync (pull + rebase/merge)' },
+          { name: 'g fix', desc: 'Fix branch sync issues' },
+          { name: 'g main', desc: 'Switch to main & pull latest' },
+          { name: 'g clean', desc: 'Remove dead local branches' },
+          { name: 'g del', desc: 'Delete branch (local + remote)' },
+          { name: 'g pull', desc: 'Standard git pull' },
+          { name: 'g push', desc: 'Standard git push' }
+        ]
+      },
+      {
+        title: '📜 History & Inspection',
+        cmds: [
+          { name: 'g ls', desc: 'Compact commit history' },
+          { name: 'g ll', desc: 'Detailed commit history' },
+          { name: 'g last', desc: 'Show last commit diff' },
+          { name: 'g t', desc: 'Show commits made today' },
+          { name: 'g stats', desc: 'Personal commit statistics' },
+          { name: 'g w', desc: 'Show system identity (whoami)' },
+          { name: 'g p', desc: 'Preview commit message' }
+        ]
+      },
+      {
+        title: '📦 Stashing & Work-in-Progress',
+        cmds: [
+          { name: 'g ss', desc: 'Quick stash save' },
+          { name: 'g pop', desc: 'Pop latest stash' },
+          { name: 'g stash', desc: 'Enhanced stash management' },
+          { name: 'g wip', desc: 'Quick work-in-progress commit' },
+          { name: 'g split', desc: 'Split large changesets' },
+          { name: 'g us', desc: 'Unstage all files' },
+          { name: 'g x', desc: 'Discard all changes' }
+        ]
+      },
+      {
+        title: '🌿 Branching & Undo',
+        cmds: [
+          { name: 'g b', desc: 'Create branch from commit' },
+          { name: 'g u', desc: 'Undo last commit' },
+          { name: 'g a', desc: 'Amend last commit' },
+          { name: 'g rs', desc: 'Reset branch to commit' },
+          { name: 'g rv', desc: 'Revert commit safely' },
+          { name: 'g conflicts', desc: 'Resolve merge conflicts' }
+        ]
+      },
+      {
+        title: '🔧 Config & Utilities',
+        cmds: [
+          { name: 'g v', desc: 'S4 Version management' },
+          { name: 'g setup', desc: 'Run setup wizard' },
+          { name: 'g config', desc: 'Manage configuration' },
+          { name: 'g init', desc: 'Initialize new repo' },
+          { name: 'g clone', desc: 'Clone a repository' },
+          { name: 'g m', desc: 'Commit with custom message' }
+        ]
+      }
+    ];
 
-    console.log(color.bold('Sync & Fix:'));
-    console.log(`  ${color.cyan('g sp')}     Safe pull (stash → pull → pop)`);
-    console.log(`  ${color.cyan('g fix')}    Fix branch sync issues`);
-    console.log(`  ${color.cyan('g main')}   Switch to main + pull\n`);
+    sections.forEach(section => {
+      console.log(color.cyan(color.bold(section.title)));
+      // Calculate padding dynamically based on longest command name in this section
+      const maxLen = Math.max(...section.cmds.map(c => c.name.length)) + 4;
 
-    console.log(color.bold('Stash:'));
-    console.log(`  ${color.cyan('g ss')}     Quick stash save`);
-    console.log(`  ${color.cyan('g pop')}    Pop latest stash`);
-    console.log(`  ${color.cyan('g us')}     Unstage all files\n`);
+      section.cmds.forEach(cmd => {
+        console.log(`  ${cmd.name.padEnd(maxLen)} ${color.dim(cmd.desc)}`);
+      });
+      console.log('');
+    });
 
-    console.log(color.bold('Smart Commands:'));
-    console.log(`  ${color.cyan('g r')}      AI code review`);
-    console.log(`  ${color.cyan('g t')}      Today's commits`);
-    console.log(`  ${color.cyan('g last')}   Last commit details\n`);
-
-    console.log(color.bold('History:'));
-    console.log(`  ${color.cyan('g ls')}     Commit history`);
-    console.log(`  ${color.cyan('g a')}      Amend last commit`);
-    console.log(`  ${color.cyan('g u')}      Undo last commit\n`);
-
-    console.log(`Full help: ${color.cyan('g --help')}`);
+    console.log(color.dim('Use "g <command> --help" for more details on any command.'));
   });
 
 program.command('init').alias('i')

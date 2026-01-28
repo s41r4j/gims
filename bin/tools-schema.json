@@ -1,0 +1,75 @@
+[
+  {
+    "type": "function",
+    "function": {
+      "name": "get_status",
+      "description": "Get enhanced git status with AI insights, file modification stats, and branch context. Use this to understand the current state of the repository.",
+      "parameters": {
+        "type": "object",
+        "properties": {}
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "analyze_history",
+      "description": "Analyze recent commit history, including authors, conventions, and activity patterns.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "limit": {
+            "type": "number",
+            "description": "Number of commits to analyze (default: 10)"
+          }
+        }
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "version_info",
+      "description": "Get current project version information using S4 versioning (Semantic + Date/Time).",
+      "parameters": {
+        "type": "object",
+        "properties": {}
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "generate_commit_message",
+      "description": "Generate a high-quality commit message based on currently staged changes.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "context": {
+            "type": "string",
+            "description": "Optional context or user instruction for the message generation"
+          }
+        }
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "run_git_command",
+      "description": "Execute a raw git command safely. Use this for standard git operations not covered by other tools.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "command": {
+            "type": "string",
+            "description": "The full git command to run (e.g., 'log -n 5', 'branch --list')"
+          }
+        },
+        "required": [
+          "command"
+        ]
+      }
+    }
+  }
+]

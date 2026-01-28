@@ -150,6 +150,47 @@ GIMS now uses the **[S4 Versioning System](https://github.com/s41r4j/s4vs)**, a 
 
 ---
 
+## 🤖 AI-Native Integration (New)
+
+GIMS is designed to be "AI-Native", allowing AI agents to directly understand and control your git repository.
+
+### 1. Model Context Protocol (MCP) Server
+
+GIMS includes a built-in [MCP](https://modelcontextprotocol.io/) server. This allows AI assistants like **Claude Desktop**, **Cursor**, and **VS Code** to directly "see" and "use" GIMS tools.
+
+#### Available Tools
+- `get_status`: Get AI-enhanced git status and insights.
+- `analyze_history`: Analyze commit history and patterns.
+- `version_info`: Get current S4 version details.
+- `generate_commit_message`: Generate a commit message for staged changes.
+- `run_git_command`: Safe execution of raw git commands.
+
+#### Usage with Claude Desktop
+Add to your `claude_desktop_config.json`:
+```json
+{
+  "mcpServers": {
+    "gims": {
+      "command": "node",
+      "args": ["/path/to/gims/mcp/index.js"]
+    }
+  }
+}
+```
+
+### 2. OpenAI / Custom Agent Integration
+
+If you are building your own AI agent (using OpenAI, LangChain, etc.), you can plug GIMS tools directly into your `tools` array using our auto-generated schemas.
+
+**Schema Location:** `bin/tools-schema.json`
+
+```javascript
+const tools = require('gims/bin/tools-schema.json');
+// Pass 'tools' directly to OpenAI API
+```
+
+---
+
 ## 🤖 AI Providers
 
 GIMS supports multiple AI providers. Choose based on your needs:
